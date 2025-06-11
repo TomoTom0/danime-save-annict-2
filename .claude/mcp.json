@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "braveSearch": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-brave-search"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "BSADppRIu4pXYKUIZqj6Tp6Z8O5hgIx"
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}
