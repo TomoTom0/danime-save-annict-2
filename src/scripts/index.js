@@ -300,9 +300,11 @@ class DanimeAnnictSender {
   }
 
   async sendToAnnict(episodeData) {
+    let historyEntry = null;
+    
     try {
       // Save to watch history first
-      const historyEntry = await this.saveToHistory(episodeData);
+      historyEntry = await this.saveToHistory(episodeData);
       
       // Check if already sent to avoid duplicates
       const storageKey = `sent_${this.siteName}_${episodeData.animeTitle}_${episodeData.episodeNumber}`;
