@@ -9,8 +9,9 @@ dアニメストア、Amazon Prime Video、AbemaTVの視聴記録を自動でAnn
 ## 特徴
 
 - **3サイト対応**: dアニメストア、Amazon Prime Video、AbemaTVの視聴記録を自動検出
-- **Annict連携**: 視聴記録を自動でAnnictに送信
-- **Webhook対応**: 複数のWebhook URLに同時通知可能
+- **柔軟な連携**: Annict連携とWebhook通知を自由に組み合わせ可能
+- **高度なWebhook**: 5種類の送信形式、個別有効化、カスタムヘッダー対応
+- **カスタマイズ性**: 送信遅延時間、サイト別有効化など細かな設定が可能
 - **重複防止**: 同じエピソードの重複送信を自動で防止
 - **モダン設計**: jQuery不使用、Manifest V3対応
 - **レスポンシブUI**: 美しく使いやすい設定画面
@@ -32,9 +33,9 @@ dアニメストア、Amazon Prime Video、AbemaTVの視聴記録を自動でAnn
 
 ### 基本設定
 1. 拡張機能のオプション画面を開く
-2. [Annict](https://annict.com/settings/apps) からAPIトークンを取得
-3. APIトークンを設定画面に入力
-4. 必要に応じてWebhook URLを設定
+2. **Annict連携の場合**: [Annict](https://annict.com/settings/apps) からAPIトークンを取得して入力
+3. **Webhook通知の場合**: Webhook URLを設定し、送信形式を選択
+4. **両方の併用も可能**: AnnictとWebhookを同時に使用可能
 
 ### 対応サイト
 - **dアニメストア** (animestore.docomo.ne.jp)

@@ -9,25 +9,138 @@ danime-save-annict-2は、視聴記録をAnnictに送信した後、設定され
 ### 送信方式
 - **HTTP Method**: POST
 - **Content-Type**: application/json
-- **タイムアウト**: 10秒
+- **タイムアウト**: 5秒
+- **カスタムヘッダー**: 認証トークンなど（設定可能）
 
 ### 送信タイミング
-- Annictへの記録送信が成功した直後
-- 複数のWebhook URLが設定されている場合、すべてに並行送信
+- 視聴開始から設定された遅延時間後（0-300秒）
+- Annictとは独立して動作（Webhookのみの利用も可能）
+- 複数のWebhook URLが設定されている場合、有効なもののみに並行送信
 
 ## 送信データ形式
 
-### 基本形式
+### シンプル形式（デフォルト）
 ```json
 {
   "text": "アニメタイトル 第X話を視聴しました (サイト名)"
 }
 ```
 
-### 実際の送信例
+### Slack形式
 ```json
 {
-  "text": "鬼滅の刃 第1話を視聴しました (dアニメストア)"
+  "text": "鬼滅の刃 第1話を視聴しました",
+  "username": "danime-annict-2",
+  "icon_emoji": ":tv:",
+  "attachments": [
+    {
+      "color": "good",
+      "fields": [
+        {
+          "title": "アニメタイトル",
+          "value": "鬼滅の刃",
+          "short": true
+        },
+        {
+          "title": "エピソード",
+          "value": "第1話",
+          "short": true
+        },
+        {
+          "title": "視聴サイト",
+          "value": "dアニメストア",
+          "short": true
+        }
+      ],
+      "footer": "danime-save-annict-2",
+      "ts": 1704085200
+    }
+  ]
+}
+```
+
+### Discord形式
+```json
+{
+  "content": "🎬 **鬼滅の刃** 第1話を視聴しました",
+  "embeds": [
+    {
+      "title": "鬼滅の刃",
+      "description": "第1話を視聴しました",
+      "color": 6716138,
+      "fields": [
+        {
+          "name": "視聴サイト",
+          "value": "dアニメストア",
+          "inline": true
+        },
+        {
+          "name": "視聴時刻",
+          "value": "2025/06/11 17:30:00",
+          "inline": true
+        }
+      ],
+      "footer": {
+        "text": "danime-save-annict-2"
+      },
+      "timestamp": "2025-06-11T08:30:00.000Z"
+    }
+  ]
+}
+```
+
+### Teams形式
+```json
+{
+  "@type": "MessageCard",
+  "@context": "http://schema.org/extensions",
+  "themeColor": "667eea",
+  "summary": "鬼滅の刃 第1話を視聴しました",
+  "sections": [
+    {
+      "activityTitle": "📺 アニメ視聴記録",
+      "activitySubtitle": "danime-save-annict-2",
+      "facts": [
+        {
+          "name": "アニメタイトル",
+          "value": "鬼滅の刃"
+        },
+        {
+          "name": "エピソード",
+          "value": "第1話"
+        },
+        {
+          "name": "視聴サイト",
+          "value": "dアニメストア"
+        },
+        {
+          "name": "視聴時刻",
+          "value": "2025/06/11 17:30:00"
+        }
+      ]
+    }
+  ]
+}
+```
+
+### カスタム形式
+テンプレート変数を使用してカスタマイズ可能：
+
+**使用可能な変数**:
+- `{title}`: アニメタイトル
+- `{episode}`: エピソード番号
+- `{site}`: 視聴サイト
+- `{timestamp}`: ISO 8601形式のタイムスタンプ
+
+**テンプレート例**:
+```json
+{
+  "message": "{title} 第{episode}話を{site}で視聴しました",
+  "anime": "{title}",
+  "episode": {episode},
+  "platform": "{site}",
+  "watched_at": "{timestamp}",
+  "user": "あなたの名前"
 }
 ```
 
@@ -205,12 +318,28 @@ async function sendWebhooks(episodeData) {
 
 ### 複数サービスへの同時送信
 ```javascript
-// 設定例
+// 設定例（新形式）
 const webhookUrls = [
-  'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
-  'https://discord.com/api/webhooks/123456789/XXXXXXXXXXXXXXXXXXXXXXXX',
-  'https://your-server.com/webhook'
+  {
+    url: 'https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX',
+    enabled: true
+  },
+  {
+    url: 'https://discord.com/api/webhooks/123456789/XXXXXXXXXXXXXXXXXXXXXXXX',
+    enabled: false  // 一時的に無効
+  },
+  {
+    url: 'https://your-server.com/webhook',
+    enabled: true
+  }
 ];
+
+// カスタムヘッダー例
+const customHeaders = {
+  "Authorization": "Bearer your-token-here",
+  "X-Custom-Header": "custom-value",
+  "X-Source": "danime-annict-2"
+};
 ```
 
 ### 条件付き送信（将来の機能）
