@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>danime-save-annict-2 設定画面</title>
+  <link rel="stylesheet" href="../src/css/options.css">
+  <style>
+    body {
+      zoom: 0.8;
+    }
+    .demo-badge {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #667eea;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      z-index: 1000;
+    }
+    
+    /* Demo specific styling */
+    input[readonly], select[readonly], textarea[readonly] {
+      background-color: #f8f9fa !important;
+    }
+    
+    .demo-highlight {
+      position: relative;
+    }
+    
+    .demo-highlight::after {
+      content: "新機能!";
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #ff6b6b;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-badge">Chrome拡張機能設定画面</div>
+  
+  <div class="container">
+    <header>
+      <h1>danime-save-annict-2 設定</h1>
+      <p>dアニメストア・Amazon Prime Video・AbemaTVの視聴記録をAnnictに送信します</p>
+    </header>
+
+    <main>
+      <section class="section">
+        <h2>Annict連携設定</h2>
+        <div class="form-group">
+          <label for="annictToken">Annict APIトークン *</label>
+          <input type="password" id="annictToken" value="sk_abcdef1234567890abcdef1234567890" readonly>
+          <small>
+            <a href="https://annict.com/settings/apps" target="_blank">Annictでトークンを取得</a>
+          </small>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Webhook設定</h2>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="enableWebhook" checked readonly> Webhookを有効にする
+          </label>
+        </div>
+        <div class="form-group enabled" id="webhookSection">
+          <label for="webhookUrl">Webhook URL</label>
+          <div id="webhookUrls">
+            <div class="webhook-input">
+              <input type="url" value="https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX" readonly>
+              <button type="button" class="btn-remove" disabled>削除</button>
+            </div>
+            <div class="webhook-input">
+              <input type="url" value="https://discord.com/api/webhooks/123456789/XXXXXXXXXXXXXXXXXXXXXXXX" readonly>
+              <button type="button" class="btn-remove" disabled>削除</button>
+            </div>
+          </div>
+          <button type="button" id="addWebhook" class="btn btn-secondary" disabled>Webhook URLを追加</button>
+          
+          <div class="webhook-format-section demo-highlight">
+            <label for="webhookFormat">Webhook送信形式</label>
+            <select id="webhookFormat" readonly>
+              <option value="simple">シンプル形式（テキストのみ）</option>
+              <option value="slack" selected>Slack形式</option>
+              <option value="discord">Discord形式</option>
+              <option value="teams">Microsoft Teams形式</option>
+              <option value="custom">カスタム形式</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <section class="section demo-highlight">
+        <h2>対応サイト設定</h2>
+        <p class="section-description">視聴記録を検出するサイトを選択してください</p>
+        <div class="site-toggle-grid">
+          <div class="site-toggle-item">
+            <label class="site-toggle">
+              <input type="checkbox" id="enableDanime" checked readonly>
+              <span class="site-name">dアニメストア</span>
+              <small>animestore.docomo.ne.jp</small>
+            </label>
+          </div>
+          <div class="site-toggle-item">
+            <label class="site-toggle">
+              <input type="checkbox" id="enableAmazon" checked readonly>
+              <span class="site-name">Amazon Prime Video</span>
+              <small>amazon.co.jp</small>
+            </label>
+          </div>
+          <div class="site-toggle-item">
+            <label class="site-toggle">
+              <input type="checkbox" id="enableAbema" checked readonly>
+              <span class="site-name">AbemaTV</span>
+              <small>abema.tv</small>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>その他の設定</h2>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="autoSend" checked readonly> 自動送信を有効にする
+          </label>
+        </div>
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="debugMode" readonly> デバッグモードを有効にする
+          </label>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>対応サイト</h2>
+        <ul class="site-list">
+          <li>dアニメストア (animestore.docomo.ne.jp)</li>
+          <li>Amazon Prime Video (amazon.co.jp)</li>
+          <li>AbemaTV (abema.tv)</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      <div class="button-group">
+        <button type="button" id="saveButton" class="btn btn-primary" disabled>設定を保存</button>
+        <button type="button" id="testButton" class="btn btn-secondary" disabled>接続テスト</button>
+      </div>
+      <div id="status" class="status success">設定を保存しました</div>
+    </footer>
+  </div>
+</body>
+</html>

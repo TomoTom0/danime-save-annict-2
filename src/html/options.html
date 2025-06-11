@@ -17,7 +17,7 @@
       <section class="section">
         <h2>Annict連携設定</h2>
         <div class="form-group">
-          <label for="annictToken">Annict APIトークン *</label>
+          <label for="annictToken">Annict APIトークン（任意）</label>
           <input type="password" id="annictToken" placeholder="Annictから取得したAPIトークンを入力">
           <small>
             <a href="https://annict.com/settings/apps" target="_blank">Annictでトークンを取得</a>
@@ -41,6 +41,90 @@
             </div>
           </div>
           <button type="button" id="addWebhook" class="btn btn-secondary">Webhook URLを追加</button>
+          
+          <div class="webhook-format-section">
+            <label for="webhookFormat">Webhook送信形式</label>
+            <select id="webhookFormat">
+              <option value="simple">シンプル形式（テキストのみ）</option>
+              <option value="slack">Slack形式</option>
+              <option value="discord">Discord形式</option>
+              <option value="teams">Microsoft Teams形式</option>
+              <option value="custom">カスタム形式</option>
+            </select>
+            
+            <div id="customWebhookTemplate" class="custom-template-section">
+              <label for="webhookTemplate">カスタムテンプレート（JSON形式）</label>
+              <textarea id="webhookTemplate" rows="8" placeholder='{
+  "text": "{title} 第{episode}話を視聴しました ({site})",
+  "username": "danime-annict-2",
+  "icon_emoji": ":tv:",
+  "attachments": [
+    {
+      "color": "good",
+      "fields": [
+        {
+          "title": "アニメタイトル",
+          "value": "{title}",
+          "short": true
+        },
+        {
+          "title": "エピソード",
+          "value": "第{episode}話",
+          "short": true
+        },
+        {
+          "title": "視聴サイト",
+          "value": "{site}",
+          "short": true
+        }
+      ]
+    }
+  ]
+}'></textarea>
+              <small>
+                使用可能な変数: {title} (アニメタイトル), {episode} (エピソード番号), {site} (視聴サイト), {timestamp} (タイムスタンプ)
+              </small>
+              
+              <div class="custom-headers-section">
+                <label for="webhookHeaders">カスタムヘッダー（JSON形式）</label>
+                <textarea id="webhookHeaders" rows="4" placeholder='{
+  "Authorization": "Bearer YOUR_TOKEN_HERE",
+  "X-Custom-Header": "custom-value"
+}'></textarea>
+                <small>
+                  認証トークンやカスタムヘッダーを指定できます（省略可能）
+                </small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>対応サイト設定</h2>
+        <p class="section-description">視聴記録を検出するサイトを選択してください</p>
+        <div class="site-toggle-grid">
+          <div class="site-toggle-item">
+            <label class="site-toggle">
+              <input type="checkbox" id="enableDanime" checked>
+              <span class="site-name">dアニメストア</span>
+              <small>animestore.docomo.ne.jp</small>
+            </label>
+          </div>
+          <div class="site-toggle-item">
+            <label class="site-toggle">
+              <input type="checkbox" id="enableAmazon" checked>
+              <span class="site-name">Amazon Prime Video</span>
+              <small>amazon.co.jp</small>
+            </label>
+          </div>
+          <div class="site-toggle-item">
+            <label class="site-toggle">
+              <input type="checkbox" id="enableAbema" checked>
+              <span class="site-name">AbemaTV</span>
+              <small>abema.tv</small>
+            </label>
+          </div>
         </div>
       </section>
 
@@ -50,6 +134,13 @@
           <label>
             <input type="checkbox" id="autoSend" checked> 自動送信を有効にする
           </label>
+        </div>
+        <div class="form-group">
+          <label for="sendDelay">視聴開始から送信までの遅延時間（秒）</label>
+          <input type="number" id="sendDelay" min="0" max="300" value="30" step="5">
+          <small>
+            視聴開始を検出してから何秒後に記録を送信するかを設定します（0-300秒）
+          </small>
         </div>
         <div class="form-group">
           <label>

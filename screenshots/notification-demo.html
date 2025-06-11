@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>通知デモ - danime-save-annict-2</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .demo-container {
+      position: relative;
+      width: 90%;
+      max-width: 800px;
+      height: 500px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .fake-browser {
+      background: #f1f3f4;
+      padding: 10px;
+      border-bottom: 1px solid #dadce0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .browser-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .browser-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27ca3f; }
+
+    .address-bar {
+      flex: 1;
+      background: white;
+      border: 1px solid #dadce0;
+      border-radius: 20px;
+      padding: 6px 16px;
+      margin-left: 20px;
+      font-size: 14px;
+      color: #5f6368;
+    }
+
+    .page-content {
+      padding: 40px;
+      text-align: center;
+      height: calc(100% - 60px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: #1a1a1a;
+      color: white;
+      position: relative;
+    }
+
+    .anime-player {
+      background: black;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .anime-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #e0e0e0;
+    }
+
+    .episode-info {
+      font-size: 1.2rem;
+      color: #b0b0b0;
+      margin-bottom: 20px;
+    }
+
+    .play-button {
+      width: 80px;
+      height: 80px;
+      background: rgba(255,255,255,0.1);
+      border: 3px solid white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 20px auto;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .play-button:hover {
+      background: rgba(255,255,255,0.2);
+      transform: scale(1.05);
+    }
+
+    .play-icon {
+      width: 0;
+      height: 0;
+      border-left: 25px solid white;
+      border-top: 15px solid transparent;
+      border-bottom: 15px solid transparent;
+      margin-left: 8px;
+    }
+
+    /* 通知スタイル */
+    .danime-annict-notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      max-width: 400px;
+      padding: 16px 20px;
+      border-radius: 8px;
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      line-height: 1.4;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .danime-annict-success {
+      background-color: #10b981;
+    }
+
+    .danime-annict-error {
+      background-color: #ef4444;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .site-indicator {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      background: rgba(255,255,255,0.1);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      color: white;
+    }
+
+    .demo-steps {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.8);
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <div class="fake-browser">
+      <div class="browser-dots">
+        <div class="browser-dot dot-red"></div>
+        <div class="browser-dot dot-yellow"></div>
+        <div class="browser-dot dot-green"></div>
+      </div>
+      <div class="address-bar">https://animestore.docomo.ne.jp/animestore/sc_d_pc</div>
+    </div>
+    
+    <div class="page-content">
+      <div class="site-indicator">dアニメストア</div>
+      
+      <div class="anime-player">
+        <div class="anime-title">鬼滅の刃</div>
+        <div class="episode-info">第1話「残酷」</div>
+        <div class="play-button" onclick="startDemo()">
+          <div class="play-icon"></div>
+        </div>
+      </div>
+      
+      <div class="demo-steps">
+        クリックして拡張機能の動作をデモ
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let demoStep = 0;
+    
+    function startDemo() {
+      if (demoStep === 0) {
+        // ステップ1: 視聴開始
+        showNotification('視聴を検出しました...', 'info', 1500);
+        demoStep = 1;
+        
+        setTimeout(() => {
+          // ステップ2: 成功通知
+          showNotification('✅ 鬼滅の刃 第1話をAnnictに記録しました', 'success', 3000);
+          demoStep = 2;
+          
+          setTimeout(() => {
+            // ステップ3: Webhook通知
+            showNotification('📡 Slack に通知を送信しました', 'success', 3000);
+            demoStep = 0; // リセット
+          }, 2000);
+        }, 1500);
+      }
+    }
+    
+    function showNotification(message, type, duration) {
+      // 既存の通知を削除
+      const existingNotification = document.querySelector('.danime-annict-notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+      
+      // 新しい通知を作成
+      const notification = document.createElement('div');
+      notification.className = `danime-annict-notification danime-annict-${type}`;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      // 指定時間後に削除
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.style.animation = 'slideIn 0.3s ease-out reverse';
+          setTimeout(() => {
+            notification.remove();
+          }, 300);
+        }
+      }, duration);
+    }
+    
+    // 自動デモ開始
+    setTimeout(() => {
+      startDemo();
+    }, 2000);
+  </script>
+</body>
+</html>
