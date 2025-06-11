@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "danime-save-annict-2",
+  "version": "0.6.5.0",
+  "description": "dアニメストア, Amazon Prime Video, AbemaTVの視聴結果をAnnictに送信します。Webhookも送信できます。",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://animestore.docomo.ne.jp/animestore/sc_d_pc?partId*",
+        "https://www.amazon.co.jp/gp/video/detail/*",
+        "https://www.amazon.co.jp/dp/*",
+        "https://abema.tv/video/*"
+      ],
+      "js": [
+        "scripts/index.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "options_ui": {
+    "page": "html/options.html",
+    "open_in_tab": true
+  },
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://api.annict.com/*"
+  ],
+  "icons": {
+    "128": "img/d-annict-icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "styles/notifications.css"
+      ],
+      "matches": [
+        "https://animestore.docomo.ne.jp/*",
+        "https://www.amazon.co.jp/*",
+        "https://abema.tv/*"
+      ]
+    }
+  ]
+}
