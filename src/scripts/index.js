@@ -47,7 +47,8 @@ class DanimeAnnictSender {
         webhookFormat: 'simple',
         webhookTemplate: '',
         webhookHeaders: '',
-        sendDelay: 30
+        sendDelay: 30,
+        showNotifications: true
       }, (result) => {
         this.isDebug = result.debugMode;
         resolve(result);
@@ -300,6 +301,9 @@ class DanimeAnnictSender {
 
   async sendToAnnict(episodeData) {
     try {
+      // Save to watch history first
+      const historyEntry = await this.saveToHistory(episodeData);
+      
       // Check if already sent to avoid duplicates
       const storageKey = `sent_${this.siteName}_${episodeData.animeTitle}_${episodeData.episodeNumber}`;
       const alreadySent = await this.checkAlreadySent(storageKey);
@@ -338,6 +342,7 @@ class DanimeAnnictSender {
       // Mark as sent if at least one method succeeded or if only webhook is configured
       if (annictSuccess || webhookSuccess || (!this.settings.annictToken && this.settings.enableWebhook)) {
         await this.markAsSent(storageKey);
+        await this.updateHistoryStatus(historyEntry.id, annictSuccess, webhookSuccess);
       }
 
       // Show appropriate notification for webhook-only mode
@@ -351,6 +356,11 @@ class DanimeAnnictSender {
     } catch (error) {
       this.log('Error processing episode:', error);
       this.showNotification('エラーが発生しました', 'error');
+      
+      // Add error to history if historyEntry exists
+      if (historyEntry && historyEntry.id) {
+        await this.addHistoryError(historyEntry.id, error);
+      }
     }
   }
 
@@ -668,6 +678,12 @@ class DanimeAnnictSender {
   }
 
   showNotification(message, type = 'info') {
+    // Check if notifications are enabled
+    if (!this.settings.showNotifications) {
+      this.log('Notification disabled:', message);
+      return;
+    }
+
     // Create modern notification element
     const notification = document.createElement('div');
     notification.className = `danime-annict-notification danime-annict-${type}`;
@@ -690,6 +706,227 @@ class DanimeAnnictSender {
         notification.parentNode.removeChild(notification);
       }
     }, 3000);
+  }
+
+  async saveToHistory(episodeData) {
+    const historyEntry = {
+      id: this.generateHistoryId(episodeData),
+      animeTitle: episodeData.animeTitle,
+      episodeNumber: episodeData.episodeNumber,
+      site: episodeData.site,
+      detectedAt: new Date().toISOString(),
+      annictSent: false,
+      webhookSent: false,
+      lastAttempt: new Date().toISOString(),
+      attempts: 0,
+      errors: []
+    };
+
+    // Get existing history
+    const history = await this.getWatchHistory();
+    
+    // Check if already exists
+    const existingIndex = history.findIndex(entry => entry.id === historyEntry.id);
+    
+    if (existingIndex !== -1) {
+      // Update existing entry
+      history[existingIndex].lastAttempt = historyEntry.lastAttempt;
+      history[existingIndex].attempts += 1;
+    } else {
+      // Add new entry
+      history.unshift(historyEntry); // Add to beginning for chronological order
+    }
+
+    // Keep only last 1000 entries to prevent storage overflow
+    if (history.length > 1000) {
+      history.splice(1000);
+    }
+
+    await this.saveWatchHistory(history);
+    return historyEntry;
+  }
+
+  generateHistoryId(episodeData) {
+    return `${this.siteName}_${episodeData.animeTitle}_${episodeData.episodeNumber}`.replace(/[^a-zA-Z0-9_]/g, '_');
+  }
+
+  async updateHistoryStatus(historyId, annictSuccess, webhookSuccess) {
+    const history = await this.getWatchHistory();
+    const entryIndex = history.findIndex(entry => entry.id === historyId);
+    
+    if (entryIndex !== -1) {
+      history[entryIndex].annictSent = annictSuccess;
+      history[entryIndex].webhookSent = webhookSuccess;
+      history[entryIndex].lastAttempt = new Date().toISOString();
+      
+      await this.saveWatchHistory(history);
+    }
+  }
+
+  async addHistoryError(historyId, error) {
+    const history = await this.getWatchHistory();
+    const entryIndex = history.findIndex(entry => entry.id === historyId);
+    
+    if (entryIndex !== -1) {
+      if (!history[entryIndex].errors) {
+        history[entryIndex].errors = [];
+      }
+      
+      history[entryIndex].errors.push({
+        timestamp: new Date().toISOString(),
+        message: error.message || error.toString()
+      });
+      
+      // Keep only last 5 errors per entry
+      if (history[entryIndex].errors.length > 5) {
+        history[entryIndex].errors.splice(0, history[entryIndex].errors.length - 5);
+      }
+      
+      await this.saveWatchHistory(history);
+    }
+  }
+
+  async getWatchHistory() {
+    return new Promise((resolve) => {
+      chrome.storage.local.get(['watchHistory'], (result) => {
+        resolve(result.watchHistory || []);
+      });
+    });
+  }
+
+  async saveWatchHistory(history) {
+    return new Promise((resolve) => {
+      chrome.storage.local.set({ watchHistory: history }, resolve);
+    });
+  }
+
+  async exportHistoryToCSV() {
+    const history = await this.getWatchHistory();
+    
+    if (history.length === 0) {
+      return null;
+    }
+
+    const csvHeader = 'アニメタイトル,エピソード番号,視聴サイト,検出日時,Annict送信,Webhook送信,最終試行,試行回数,エラー\n';
+    
+    const csvRows = history.map(entry => {
+      const errors = entry.errors ? entry.errors.map(e => e.message).join(';') : '';
+      return [
+        this.escapeCSV(entry.animeTitle),
+        entry.episodeNumber,
+        this.escapeCSV(entry.site),
+        entry.detectedAt,
+        entry.annictSent ? '成功' : '未送信',
+        entry.webhookSent ? '成功' : '未送信',
+        entry.lastAttempt,
+        entry.attempts,
+        this.escapeCSV(errors)
+      ].join(',');
+    });
+
+    return csvHeader + csvRows.join('\n');
+  }
+
+  escapeCSV(str) {
+    if (typeof str !== 'string') return str;
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return '"' + str.replace(/"/g, '""') + '"';
+    }
+    return str;
+  }
+
+  async importHistoryFromCSV(csvContent) {
+    try {
+      const lines = csvContent.split('\n');
+      const header = lines[0];
+      
+      // Validate header
+      if (!header.includes('アニメタイトル') || !header.includes('エピソード番号')) {
+        throw new Error('無効なCSVファイル形式です');
+      }
+
+      const importedEntries = [];
+      
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        const columns = this.parseCSVLine(line);
+        if (columns.length < 5) continue;
+        
+        const entry = {
+          id: this.generateHistoryId({
+            animeTitle: columns[0],
+            episodeNumber: parseInt(columns[1]),
+            site: columns[2]
+          }),
+          animeTitle: columns[0],
+          episodeNumber: parseInt(columns[1]),
+          site: columns[2],
+          detectedAt: columns[3],
+          annictSent: columns[4] === '成功',
+          webhookSent: columns[5] === '成功',
+          lastAttempt: columns[6] || columns[3],
+          attempts: parseInt(columns[7]) || 0,
+          errors: columns[8] ? columns[8].split(';').map(msg => ({
+            timestamp: new Date().toISOString(),
+            message: msg
+          })) : []
+        };
+        
+        importedEntries.push(entry);
+      }
+
+      // Merge with existing history
+      const existingHistory = await this.getWatchHistory();
+      const mergedHistory = [...importedEntries];
+      
+      // Add existing entries that are not in imported data
+      existingHistory.forEach(existing => {
+        if (!importedEntries.find(imported => imported.id === existing.id)) {
+          mergedHistory.push(existing);
+        }
+      });
+      
+      // Sort by detection date (newest first)
+      mergedHistory.sort((a, b) => new Date(b.detectedAt) - new Date(a.detectedAt));
+      
+      await this.saveWatchHistory(mergedHistory);
+      return importedEntries.length;
+    } catch (error) {
+      throw new Error(`CSVインポートに失敗しました: ${error.message}`);
+    }
+  }
+
+  parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    let i = 0;
+    
+    while (i < line.length) {
+      const char = line[i];
+      
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i += 2;
+        } else {
+          inQuotes = !inQuotes;
+          i++;
+        }
+      } else if (char === ',' && !inQuotes) {
+        result.push(current);
+        current = '';
+        i++;
+      } else {
+        current += char;
+        i++;
+      }
+    }
+    
+    result.push(current);
+    return result;
   }
 
   log(...args) {

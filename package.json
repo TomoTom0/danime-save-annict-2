@@ -1,0 +1,54 @@
+{
+  "name": "danime-save-annict-2",
+  "version": "0.6.6.0",
+  "description": "dアニメストア・Amazon Prime Video・AbemaTVの視聴記録をAnnictに送信するChrome拡張機能",
+  "author": "TomoTom0",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TomoTom0/danime-save-annict-2.git"
+  },
+  "homepage": "https://github.com/TomoTom0/danime-save-annict-2",
+  "bugs": {
+    "url": "https://github.com/TomoTom0/danime-save-annict-2/issues",
+    "contact_form": "https://docs.google.com/forms/d/e/1FAIpQLSdh2wRCUWpX6ZLfma-g5O46eD93wOPHpDHWQGxdOcJLmm_tGQ/viewform?usp=pp_url&entry.1848091360=danime-save-annict-2"
+  },
+  "keywords": [
+    "chrome-extension",
+    "annict",
+    "anime",
+    "danime",
+    "amazon-prime-video",
+    "abematv",
+    "webhook",
+    "manifest-v3"
+  ],
+  "chrome_web_store": {
+    "id": "kclfdffcicdnmfjaiikclpoldoojfnpj",
+    "url": "https://chrome.google.com/webstore/detail/danime-save-annict-2/kclfdffcicdnmfjaiikclpoldoojfnpj"
+  },
+  "scripts": {
+    "test": "cd tests && npm test",
+    "build": "echo 'No build process required for Chrome extension'",
+    "lint": "echo 'Linting not configured'",
+    "dev": "echo 'Load src/ directory as unpacked extension in Chrome'"
+  },
+  "devDependencies": {},
+  "dependencies": {},
+  "engines": {
+    "chrome": ">=88"
+  },
+  "manifest": {
+    "version": 3,
+    "permissions": [
+      "storage",
+      "activeTab"
+    ],
+    "host_permissions": [
+      "https://api.annict.com/*",
+      "https://animestore.docomo.ne.jp/*",
+      "https://www.amazon.co.jp/*",
+      "https://abema.tv/*"
+    ]
+  }
+}

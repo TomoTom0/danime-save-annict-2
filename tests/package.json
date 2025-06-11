@@ -1,6 +1,6 @@
 {
   "name": "danime-save-annict-2-tests",
-  "version": "0.6.5.0",
+  "version": "0.6.6.0",
   "description": "テストスイート for danime-save-annict-2 Chrome拡張機能",
   "private": true,
   "scripts": {

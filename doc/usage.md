@@ -47,6 +47,20 @@ danime-save-annict-2は、dアニメストア、Amazon Prime Video、AbemaTVの�
 - **Amazon Prime Video** (amazon.co.jp)
 - **AbemaTV** (abema.tv)
 
+## 詳細な設定
+
+### 視聴履歴の確認（v0.6.6.0の新機能）
+1. 拡張機能のオプション画面を開く
+2. 「視聴履歴」タブをクリック
+3. **履歴が自動的に表示される**（手動読み込み不要）
+4. 検索・フィルタ機能で目的の記録を見つける
+5. 必要に応じて再送信や削除が可能
+
+### UI改善点（v0.6.6.0）
+- **自動表示**: 履歴タブを開くだけで履歴が表示
+- **優先度配置**: よく使う機能（再送信）を上部、管理機能（削除）を下部に配置
+- **視覚的分離**: 主要操作と管理操作が明確に分離
+
 ## 設定項目
 
 ### 基本設定
@@ -134,8 +148,9 @@ danime-save-annict-2は、dアニメストア、Amazon Prime Video、AbemaTVの�
 ## サポート
 
 ### お問い合わせ
-- **GitHub Issues**: [リポジトリのIssues](https://github.com/TomoTom0/danime-save-annict-2/issues)
-- **Email**: TomoIris427+GitHub@gmail.com
+- **📝 お問い合わせフォーム**: [Google Forms](https://docs.google.com/forms/d/e/1FAIpQLSdh2wRCUWpX6ZLfma-g5O46eD93wOPHpDHWQGxdOcJLmm_tGQ/viewform?usp=pp_url&entry.1848091360=danime-save-annict-2) - バグ報告、機能要望、使用方法の質問
+- **🐛 GitHub Issues**: [リポジトリのIssues](https://github.com/TomoTom0/danime-save-annict-2/issues) - 技術的な問題やバグ報告（開発者向け）
+- **⭐ Chrome Web Store**: [拡張機能の評価・レビュー](https://chrome.google.com/webstore/detail/danime-save-annict-2/kclfdffcicdnmfjaiikclpoldoojfnpj)
 
 ### よくある質問
 - **Q: 劇場版アニメに対応していますか？**  

@@ -14,47 +14,141 @@
     </header>
 
     <main>
-      <section class="section">
-        <h2>Annict連携設定</h2>
-        <div class="form-group">
-          <label for="annictToken">Annict APIトークン（任意）</label>
-          <input type="password" id="annictToken" placeholder="Annictから取得したAPIトークンを入力">
-          <small>
-            <a href="https://annict.com/settings/apps" target="_blank">Annictでトークンを取得</a>
-          </small>
+      <!-- Unsaved Changes Warning -->
+      <div id="unsavedWarning" class="unsaved-warning" style="display: none;">
+        <div class="warning-content">
+          <span class="warning-icon">⚠️</span>
+          <span class="warning-text">未保存の変更があります</span>
+          <button type="button" id="saveFromWarning" class="btn btn-mini btn-primary">保存</button>
+          <button type="button" id="discardChanges" class="btn btn-mini btn-secondary">破棄</button>
         </div>
-      </section>
+      </div>
 
-      <section class="section">
-        <h2>Webhook設定</h2>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" id="enableWebhook"> Webhookを有効にする
-          </label>
-        </div>
-        <div class="form-group" id="webhookSection">
-          <label for="webhookUrl">Webhook URL</label>
-          <div id="webhookUrls">
-            <div class="webhook-input">
-              <input type="url" placeholder="https://hooks.slack.com/services/...">
-              <button type="button" class="btn-remove">削除</button>
+      <!-- Tab Navigation -->
+      <nav class="tab-navigation">
+        <button class="tab-button active" data-tab="basic">基本設定</button>
+        <button class="tab-button" data-tab="annict">Annict連携</button>
+        <button class="tab-button" data-tab="webhook">Webhook設定</button>
+        <button class="tab-button" data-tab="history">視聴履歴</button>
+        <button class="tab-button" data-tab="about">情報</button>
+      </nav>
+
+      <!-- Tab Content -->
+      <div class="tab-content">
+        <!-- Basic Settings Tab -->
+        <div id="basic" class="tab-pane active">
+          <section class="section">
+            <h2>対応サイト設定</h2>
+            <p class="section-description">視聴記録を検出するサイトを選択してください</p>
+            <div class="site-toggle-grid">
+              <div class="site-toggle-item">
+                <label class="site-toggle">
+                  <input type="checkbox" id="enableDanime">
+                  <span class="site-name">dアニメストア</span>
+                  <small>animestore.docomo.ne.jp</small>
+                </label>
+              </div>
+              <div class="site-toggle-item">
+                <label class="site-toggle">
+                  <input type="checkbox" id="enableAmazon">
+                  <span class="site-name">Amazon Prime Video</span>
+                  <small>amazon.co.jp</small>
+                </label>
+              </div>
+              <div class="site-toggle-item">
+                <label class="site-toggle">
+                  <input type="checkbox" id="enableAbema">
+                  <span class="site-name">AbemaTV</span>
+                  <small>abema.tv</small>
+                </label>
+              </div>
             </div>
-          </div>
-          <button type="button" id="addWebhook" class="btn btn-secondary">Webhook URLを追加</button>
-          
-          <div class="webhook-format-section">
-            <label for="webhookFormat">Webhook送信形式</label>
-            <select id="webhookFormat">
-              <option value="simple">シンプル形式（テキストのみ）</option>
-              <option value="slack">Slack形式</option>
-              <option value="discord">Discord形式</option>
-              <option value="teams">Microsoft Teams形式</option>
-              <option value="custom">カスタム形式</option>
-            </select>
-            
-            <div id="customWebhookTemplate" class="custom-template-section">
-              <label for="webhookTemplate">カスタムテンプレート（JSON形式）</label>
-              <textarea id="webhookTemplate" rows="8" placeholder='{
+          </section>
+
+          <section class="section">
+            <h2>動作設定</h2>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="autoSend"> 自動送信を有効にする
+              </label>
+              <small>視聴記録を自動的に送信します</small>
+            </div>
+            <div class="form-group">
+              <label for="sendDelay">視聴開始から送信までの遅延時間（秒）</label>
+              <input type="number" id="sendDelay" min="0" max="300" value="30" step="5">
+              <small>
+                視聴開始を検出してから何秒後に記録を送信するかを設定します（0-300秒）
+              </small>
+            </div>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="showNotifications"> 送信時に画面通知を表示する
+              </label>
+              <small>記録送信の成功・失敗を画面に通知します</small>
+            </div>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="debugMode"> デバッグモードを有効にする
+              </label>
+              <small>開発者ツールに詳細なログを出力します</small>
+            </div>
+          </section>
+        </div>
+
+        <!-- Annict Settings Tab -->
+        <div id="annict" class="tab-pane">
+          <section class="section">
+            <h2>Annict連携設定</h2>
+            <p class="section-description">Annictサービスとの連携を設定します（任意）</p>
+            <div class="form-group">
+              <label for="annictToken">Annict APIトークン</label>
+              <input type="password" id="annictToken" placeholder="Annictから取得したAPIトークンを入力">
+              <small>
+                <a href="https://annict.com/settings/apps" target="_blank">Annictでトークンを取得 →</a>
+                <br>※ Annictを使用しない場合は空欄のままでも構いません
+              </small>
+            </div>
+            <div class="form-group">
+              <button type="button" id="testButton" class="btn btn-secondary">接続テスト</button>
+              <small>入力したAPIトークンでAnnictに接続できるかテストします</small>
+            </div>
+          </section>
+        </div>
+
+        <!-- Webhook Settings Tab -->
+        <div id="webhook" class="tab-pane">
+          <section class="section">
+            <h2>Webhook設定</h2>
+            <p class="section-description">外部サービスへの通知を設定します（任意）</p>
+            <div class="form-group">
+              <label>
+                <input type="checkbox" id="enableWebhook"> Webhookを有効にする
+              </label>
+              <small>Slack、Discord、Teams等への通知が可能です</small>
+            </div>
+            <div class="form-group" id="webhookSection">
+              <label for="webhookUrl">Webhook URL</label>
+              <div id="webhookUrls">
+                <div class="webhook-input">
+                  <input type="url" placeholder="https://hooks.slack.com/services/...">
+                  <button type="button" class="btn-remove">削除</button>
+                </div>
+              </div>
+              <button type="button" id="addWebhook" class="btn btn-secondary">Webhook URLを追加</button>
+              
+              <div class="webhook-format-section">
+                <label for="webhookFormat">Webhook送信形式</label>
+                <select id="webhookFormat">
+                  <option value="simple">シンプル形式（テキストのみ）</option>
+                  <option value="slack">Slack形式</option>
+                  <option value="discord">Discord形式</option>
+                  <option value="teams">Microsoft Teams形式</option>
+                  <option value="custom">カスタム形式</option>
+                </select>
+                
+                <div id="customWebhookTemplate" class="custom-template-section">
+                  <label for="webhookTemplate">カスタムテンプレート（JSON形式）</label>
+                  <textarea id="webhookTemplate" rows="8" placeholder='{
   "text": "{title} 第{episode}話を視聴しました ({site})",
   "username": "danime-annict-2",
   "icon_emoji": ":tv:",
@@ -81,88 +175,176 @@
     }
   ]
 }'></textarea>
-              <small>
-                使用可能な変数: {title} (アニメタイトル), {episode} (エピソード番号), {site} (視聴サイト), {timestamp} (タイムスタンプ)
-              </small>
-              
-              <div class="custom-headers-section">
-                <label for="webhookHeaders">カスタムヘッダー（JSON形式）</label>
-                <textarea id="webhookHeaders" rows="4" placeholder='{
+                  <small>
+                    使用可能な変数: {title} (アニメタイトル), {episode} (エピソード番号), {site} (視聴サイト), {timestamp} (タイムスタンプ)
+                  </small>
+                  
+                  <div class="custom-headers-section">
+                    <label for="webhookHeaders">カスタムヘッダー（JSON形式）</label>
+                    <textarea id="webhookHeaders" rows="4" placeholder='{
   "Authorization": "Bearer YOUR_TOKEN_HERE",
   "X-Custom-Header": "custom-value"
 }'></textarea>
-                <small>
-                  認証トークンやカスタムヘッダーを指定できます（省略可能）
-                </small>
+                    <small>
+                      認証トークンやカスタムヘッダーを指定できます（省略可能）
+                    </small>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          </section>
         </div>
-      </section>
 
-      <section class="section">
-        <h2>対応サイト設定</h2>
-        <p class="section-description">視聴記録を検出するサイトを選択してください</p>
-        <div class="site-toggle-grid">
-          <div class="site-toggle-item">
-            <label class="site-toggle">
-              <input type="checkbox" id="enableDanime" checked>
-              <span class="site-name">dアニメストア</span>
-              <small>animestore.docomo.ne.jp</small>
-            </label>
-          </div>
-          <div class="site-toggle-item">
-            <label class="site-toggle">
-              <input type="checkbox" id="enableAmazon" checked>
-              <span class="site-name">Amazon Prime Video</span>
-              <small>amazon.co.jp</small>
-            </label>
-          </div>
-          <div class="site-toggle-item">
-            <label class="site-toggle">
-              <input type="checkbox" id="enableAbema" checked>
-              <span class="site-name">AbemaTV</span>
-              <small>abema.tv</small>
-            </label>
-          </div>
-        </div>
-      </section>
+        <!-- History Tab -->
+        <div id="history" class="tab-pane">
+          <section class="section">
+            <h2>視聴履歴管理</h2>
+            <p class="section-description">視聴記録の確認と管理、データのインポート/エクスポートができます</p>
+            
+            <div class="history-controls">
+              <div class="button-group secondary-actions">
+                <button type="button" id="viewHistoryButton" class="btn btn-secondary">履歴を非表示</button>
+                <button type="button" id="exportHistoryButton" class="btn btn-secondary">CSVエクスポート</button>
+                <label for="importHistoryFile" class="btn btn-secondary">
+                  CSVインポート
+                  <input type="file" id="importHistoryFile" accept=".csv" style="display: none;">
+                </label>
+                <button type="button" id="clearHistoryButton" class="btn btn-remove">履歴削除</button>
+              </div>
+            </div>
 
-      <section class="section">
-        <h2>その他の設定</h2>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" id="autoSend" checked> 自動送信を有効にする
-          </label>
+            <div id="historySection" class="history-section" style="display: block;">
+              <div class="history-filters">
+                <div class="filter-row">
+                  <input type="text" id="historySearch" placeholder="アニメタイトルで検索...">
+                  <select id="historyFilter">
+                    <option value="all">すべて</option>
+                    <option value="unsent">未送信</option>
+                    <option value="annict-sent">Annict送信済み</option>
+                    <option value="webhook-sent">Webhook送信済み</option>
+                    <option value="errors">エラーあり</option>
+                  </select>
+                  <select id="historySite">
+                    <option value="all">すべてのサイト</option>
+                    <option value="dアニメストア">dアニメストア</option>
+                    <option value="Amazon Prime Video">Amazon Prime Video</option>
+                    <option value="AbemaTV">AbemaTV</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="history-stats">
+                <span id="historyCount">履歴: 0件</span>
+                <span id="unsentCount">未送信: 0件</span>
+              </div>
+              
+              <div class="history-table-container">
+                <table id="historyTable" class="history-table">
+                  <thead>
+                    <tr>
+                      <th><input type="checkbox" id="selectAllHistory"></th>
+                      <th class="sortable" data-sort="animeTitle">アニメタイトル</th>
+                      <th class="sortable" data-sort="episodeNumber">話数</th>
+                      <th class="sortable" data-sort="site">サイト</th>
+                      <th class="sortable" data-sort="detectedAt">検出日時</th>
+                      <th>Annict</th>
+                      <th>Webhook</th>
+                      <th>操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="historyTableBody">
+                  </tbody>
+                </table>
+              </div>
+              
+              <div class="history-actions">
+                <div class="action-group primary-actions">
+                  <button type="button" id="resendSelectedButton" class="btn btn-primary">選択した項目を再送信</button>
+                </div>
+                <div class="action-group secondary-actions">
+                  <button type="button" id="deleteSelectedButton" class="btn btn-remove">選択した項目を削除</button>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
-        <div class="form-group">
-          <label for="sendDelay">視聴開始から送信までの遅延時間（秒）</label>
-          <input type="number" id="sendDelay" min="0" max="300" value="30" step="5">
-          <small>
-            視聴開始を検出してから何秒後に記録を送信するかを設定します（0-300秒）
-          </small>
-        </div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" id="debugMode"> デバッグモードを有効にする
-          </label>
-        </div>
-      </section>
 
-      <section class="section">
-        <h2>対応サイト</h2>
-        <ul class="site-list">
-          <li>dアニメストア (animestore.docomo.ne.jp)</li>
-          <li>Amazon Prime Video (amazon.co.jp)</li>
-          <li>AbemaTV (abema.tv)</li>
-        </ul>
-      </section>
+        <!-- About Tab -->
+        <div id="about" class="tab-pane">
+          <section class="section">
+            <h2>対応サイト</h2>
+            <p class="section-description">以下のサイトで視聴記録を自動検出できます</p>
+            <ul class="site-list">
+              <li>dアニメストア (animestore.docomo.ne.jp)</li>
+              <li>Amazon Prime Video (amazon.co.jp)</li>
+              <li>AbemaTV (abema.tv)</li>
+            </ul>
+          </section>
+
+          <section class="section">
+            <h2>使用方法</h2>
+            <div class="usage-guide">
+              <div class="usage-step">
+                <h3>1. 基本設定</h3>
+                <p>「基本設定」タブで対応サイトの有効化と動作設定を行います。</p>
+              </div>
+              <div class="usage-step">
+                <h3>2. 連携設定</h3>
+                <p>「Annict連携」または「Webhook設定」で送信先を設定します。どちらか一方、または両方を設定できます。</p>
+              </div>
+              <div class="usage-step">
+                <h3>3. 視聴開始</h3>
+                <p>対応サイトでアニメを視聴すると、自動的に記録が送信されます。</p>
+              </div>
+              <div class="usage-step">
+                <h3>4. 履歴確認</h3>
+                <p>「視聴履歴」タブで送信履歴を確認し、必要に応じて再送信できます。</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <h2>サポート・問い合わせ</h2>
+            <div class="support-info">
+              <div class="support-item">
+                <h4>📝 お問い合わせフォーム</h4>
+                <p>バグ報告、機能要望、使用方法の質問はこちらから</p>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSdh2wRCUWpX6ZLfma-g5O46eD93wOPHpDHWQGxdOcJLmm_tGQ/viewform?usp=pp_url&entry.1848091360=danime-save-annict-2" target="_blank" class="btn btn-primary">お問い合わせフォームを開く</a>
+              </div>
+              
+              <div class="support-item">
+                <h4>🐛 GitHub Issues</h4>
+                <p>技術的な問題やバグ報告（開発者向け）</p>
+                <a href="https://github.com/TomoTom0/danime-save-annict-2/issues" target="_blank" class="btn btn-secondary">GitHub Issues</a>
+              </div>
+              
+              <div class="support-item">
+                <h4>⭐ Chrome Web Store</h4>
+                <p>拡張機能の評価・レビューをお願いします</p>
+                <a href="https://chrome.google.com/webstore/detail/danime-save-annict-2/kclfdffcicdnmfjaiikclpoldoojfnpj" target="_blank" class="btn btn-secondary">Chrome Web Storeで評価</a>
+              </div>
+            </div>
+          </section>
+
+          <section class="section">
+            <h2>バージョン情報</h2>
+            <div class="version-info">
+              <p><strong>danime-save-annict-2</strong></p>
+              <p>バージョン: 0.6.6.0</p>
+              <p>作成者: TomoTom0</p>
+              <p>
+                <a href="https://github.com/TomoTom0/danime-save-annict-2" target="_blank">GitHub リポジトリ</a> |
+                <a href="https://github.com/TomoTom0/danime-save-annict-2/blob/main/PRIVACY_POLICY.md" target="_blank">プライバシーポリシー</a>
+              </p>
+            </div>
+          </section>
+        </div>
+      </div>
     </main>
 
     <footer>
       <div class="button-group">
         <button type="button" id="saveButton" class="btn btn-primary">設定を保存</button>
-        <button type="button" id="testButton" class="btn btn-secondary">接続テスト</button>
       </div>
       <div id="status" class="status"></div>
     </footer>

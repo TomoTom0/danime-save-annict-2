@@ -8,18 +8,40 @@ dアニメストア、Amazon Prime Video、AbemaTVの視聴記録を自動でAnn
 
 ## 特徴
 
+### 🎯 **視聴記録の自動化**
 - **3サイト対応**: dアニメストア、Amazon Prime Video、AbemaTVの視聴記録を自動検出
-- **柔軟な連携**: Annict連携とWebhook通知を自由に組み合わせ可能
-- **高度なWebhook**: 5種類の送信形式、個別有効化、カスタムヘッダー対応
-- **カスタマイズ性**: 送信遅延時間、サイト別有効化など細かな設定が可能
+- **柔軟な連携**: Annict連携とWebhook通知を自由に組み合わせ可能（どちらか一方、または両方）
 - **重複防止**: 同じエピソードの重複送信を自動で防止
-- **モダン設計**: jQuery不使用、Manifest V3対応
-- **レスポンシブUI**: 美しく使いやすい設定画面
+
+### 🔧 **高度なカスタマイズ**
+- **サイト別設定**: 各動画サイトを個別に有効/無効可能
+- **送信タイミング**: 視聴開始から0-300秒の遅延時間設定
+- **通知制御**: 画面通知の表示/非表示切り替え
+- **自動保存**: チェックボックス設定は即座に保存、その他は未保存警告で安心
+
+### 📡 **高度なWebhook機能**
+- **5種類の送信形式**: シンプル/Slack/Discord/Teams/カスタム形式
+- **個別制御**: 複数WebhookURLの個別有効化/無効化
+- **認証対応**: カスタムヘッダーでトークン認証可能
+- **変数置換**: カスタムテンプレートで柔軟な通知内容
+
+### 📊 **視聴履歴管理**
+- **完全な履歴**: 全ての視聴記録をローカルストレージに保存
+- **送信状況**: Annict/Webhook送信の成功/失敗状況を管理
+- **検索・フィルタ**: タイトル検索、サイト別・送信状況別フィルタ
+- **データ管理**: CSV形式でのインポート/エクスポート機能
+- **再送信**: 未送信の記録を個別または一括で再送信
+
+### 💎 **モダンなUI/UX**
+- **タブ式設定画面**: 5つのタブで情報を整理（基本設定/Annict連携/Webhook設定/視聴履歴/情報）
+- **レスポンシブデザイン**: PC・モバイル両対応
+- **未保存警告**: 設定変更時の保存忘れを防止
+- **スムーズアニメーション**: 読み込み時のちらつきを排除
 
 ## インストール
 
 ### Chrome Web Store（推奨）
-[Chrome Web Store](https://chrome.google.com/webstore/detail/danime-save-annict-2/kclfdffcicdnmfjaiikclpoldoojfnpj?hl=ja)からインストール
+[Chrome Web Store](https://chrome.google.com/webstore/detail/danime-save-annict-2/kclfdffcicdnmfjaiikclpoldoojfnpj)からインストール
 
 ### 開発版
 1. このリポジトリをクローン
@@ -45,13 +67,14 @@ dアニメストア、Amazon Prime Video、AbemaTVの視聴記録を自動でAnn
 ## 技術仕様
 
 ### バージョン
-現在のバージョン: **0.6.5.0** ([バージョン履歴](doc/update.md))
+現在のバージョン: **0.6.6.0** ([バージョン履歴](doc/update.md) | [変更ログ](doc/CHANGELOG.md))
 
 ### 主要技術
 - **Manifest V3**: Chrome拡張機能の最新仕様
-- **ES6+ JavaScript**: モダンなネイティブJavaScript
-- **CSS3**: レスポンシブデザイン
+- **ES6+ JavaScript**: モダンなネイティブJavaScript（依存関係なし）
+- **CSS3**: レスポンシブデザインとアニメーション
 - **Chrome Storage API**: 設定とデータの管理
+- **CSP準拠**: セキュリティ強化のためのContent Security Policy対応
 
 ### ブラウザ対応
 - Chrome 88以降
@@ -104,6 +127,8 @@ npm run test:coverage   # カバレッジ測定
 ### 開発ガイド
 - [実装ガイド](IMPLEMENTATION.md): 開発者向けの詳細な実装情報
 - [API仕様書](doc/API/): Annict API、Webhook APIの仕様
+- [エラーハンドリング](doc/error-handling.md): エラー処理とデバッグ方法
+- [パフォーマンス](doc/performance.md): パフォーマンス最適化の指針
 
 ## ドキュメント
 
@@ -131,12 +156,10 @@ npm run test:coverage   # カバレッジ測定
 
 ## サポート
 
-### バグ報告・機能要望
-[GitHub Issues](https://github.com/TomoTom0/danime-save-annict-2/issues) でお知らせください。
-
 ### お問い合わせ
-- **GitHub Issues**: [リポジトリのIssues](https://github.com/TomoTom0/danime-save-annict-2/issues)
-- **Email**: TomoIris427+GitHub@gmail.com
+- **📝 お問い合わせフォーム**: [Google Forms](https://docs.google.com/forms/d/e/1FAIpQLSdh2wRCUWpX6ZLfma-g5O46eD93wOPHpDHWQGxdOcJLmm_tGQ/viewform?usp=pp_url&entry.1848091360=danime-save-annict-2) - バグ報告、機能要望、使用方法の質問
+- **🐛 GitHub Issues**: [リポジトリのIssues](https://github.com/TomoTom0/danime-save-annict-2/issues) - 技術的な問題やバグ報告（開発者向け）
+- **⭐ Chrome Web Store**: [拡張機能の評価・レビュー](https://chrome.google.com/webstore/detail/danime-save-annict-2/kclfdffcicdnmfjaiikclpoldoojfnpj)
 
 ## 参考・謝辞
 
@@ -158,9 +181,10 @@ This Chrome extension automatically sends your anime watching records from d-ani
 
 **Features:**
 - Support for 3 major anime streaming services
-- Automatic integration with Annict
-- Multiple webhook notifications
-- Duplicate prevention
-- Modern responsive UI
-- No external dependencies (jQuery-free)
+- Automatic integration with Annict and webhook notifications
+- Advanced webhook system with 5 different formats
+- Duplicate prevention and viewing history management
+- Modern responsive UI with smooth animations
+- No external dependencies (jQuery-free, Bootstrap-free)
+- Complete rewrite with ES6+ and Manifest V3
 
