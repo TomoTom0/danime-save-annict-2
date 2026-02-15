@@ -1,0 +1,314 @@
+/* Reset and base styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+/* Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* Grid system */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -15px;
+}
+
+.col-lg-2,
+.col-lg-7,
+.col-lg-10,
+.col-lg-12 {
+  padding: 0 15px;
+}
+
+.col-lg-2 {
+  flex: 0 0 16.666667%;
+  max-width: 16.666667%;
+}
+
+.col-lg-7 {
+  flex: 0 0 58.333333%;
+  max-width: 58.333333%;
+}
+
+.col-lg-10 {
+  flex: 0 0 83.333333%;
+  max-width: 83.333333%;
+}
+
+.col-lg-12 {
+  flex: 0 0 100%;
+  max-width: 100%;
+}
+
+.col-lg-offset-2 {
+  margin-left: 16.666667%;
+}
+
+/* Page sections */
+.bs-docs-section {
+  margin-bottom: 40px;
+}
+
+.page-header {
+  padding-bottom: 9px;
+  margin: 40px 0 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+/* Well component */
+.well {
+  min-height: 20px;
+  padding: 19px;
+  margin-bottom: 20px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.bs-component {
+  position: relative;
+}
+
+/* Forms */
+.form-horizontal {
+  margin: 0;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.control-label {
+  padding-top: 7px;
+  margin-bottom: 0;
+  text-align: right;
+  font-weight: 600;
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #555;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+}
+
+.form-control:focus {
+  border-color: #66afe9;
+  outline: 0;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(102, 175, 233, 0.6);
+}
+
+/* Custom controls */
+.custom-control {
+  position: relative;
+  display: block;
+  min-height: 1.5rem;
+  padding-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.custom-control-input {
+  position: absolute;
+  left: 0;
+  z-index: -1;
+  width: 1rem;
+  height: 1.25rem;
+  opacity: 0;
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.custom-control-label {
+  position: relative;
+  margin-bottom: 0;
+  vertical-align: top;
+}
+
+.custom-checkbox .custom-control-input {
+  width: auto;
+  position: relative;
+  left: auto;
+  z-index: auto;
+  opacity: 1;
+  margin-right: 5px;
+}
+
+.custom-webhook-checkbox {
+  margin-bottom: 10px;
+}
+
+.custom-control-webhook-input {
+  margin-right: 5px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-bottom: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  background-image: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn:hover {
+  opacity: 0.8;
+}
+
+.btn:active {
+  box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #337ab7;
+  border-color: #2e6da4;
+}
+
+.btn-primary:hover {
+  background-color: #286090;
+  border-color: #204d74;
+}
+
+.deleteButton {
+  background-color: #d9534f;
+  border-color: #d43f3a;
+  margin-left: 5px;
+}
+
+.deleteButton:hover {
+  background-color: #c9302c;
+  border-color: #ac2925;
+}
+
+/* Webhook specific styles */
+.webhookContent {
+  margin-top: 10px;
+}
+
+.webhookKey {
+  width: 15%;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.webhookValue {
+  width: 60%;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.btn_webhookBlockDelete {
+  margin-bottom: 20px;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  max-width: 100%;
+  margin-bottom: 20px;
+  border-collapse: collapse;
+}
+
+table th,
+table td {
+  padding: 1em 10px 1em 1em;
+  border-right: 1px solid #bbb;
+}
+
+/* Utility classes */
+hr {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border: 0;
+  border-top: 1px solid #eee;
+}
+
+h2 {
+  font-size: 2rem;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+h3 {
+  font-size: 1.75rem;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+h5 {
+  font-size: 1.25rem;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/* License */
+.license {
+  font-family: sans-serif;
+}
+
+pre {
+  background-color: #eeeeee;
+  padding: 1em;
+  white-space: pre-wrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .col-lg-2,
+  .col-lg-7,
+  .col-lg-10,
+  .col-lg-12 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .col-lg-offset-2 {
+    margin-left: 0;
+  }
+
+  .control-label {
+    text-align: left;
+  }
+}

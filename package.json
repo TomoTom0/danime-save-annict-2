@@ -1,0 +1,25 @@
+{
+  "name": "danime-save-annict-2",
+  "version": "0.6.4.0",
+  "description": "dアニメストア, Amazon Prime Video, AbemaTVの視聴結果をAnnictに送信します。Webhookも送信できます。",
+  "scripts": {
+    "build": "npm run build:ts && npm run build:css",
+    "build:ts": "tsc",
+    "build:css": "sass src/styles:dist/styles",
+    "watch": "npm run watch:ts & npm run watch:css",
+    "watch:ts": "tsc --watch",
+    "watch:css": "sass --watch src/styles:dist/styles",
+    "test": "cd tests && npm test"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "sass": "^1.77.0",
+    "typescript": "^5.4.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TomoTom0/danime-save-annict-2.git"
+  },
+  "author": "TomoTom0",
+  "license": "MIT"
+}

@@ -1,6 +1,19 @@
+// Type definitions
+interface WebhookSetting {
+  postUrl: string;
+  webhookNoMatched: boolean;
+  webhookNoWorkId: boolean;
+  webhookSuccess: boolean;
+  webhookContentChanged: boolean;
+  webhookContent: Record<string, string>;
+}
+
+interface WebhookSettings {
+  [key: string]: WebhookSetting;
+}
 
 // Simple message display function (replacement for iziToast)
-function showSimpleMessage(title, message) {
+function showSimpleMessage(title: string, message: string): void {
     alert(`${title}: ${message}`);
 }
 
@@ -15,14 +28,16 @@ const webhookKeys = {
     input: ["postUrl"]
 };
 
-const checkValid1 = Object.assign({ "valid_danime": true }, ...["amazon",  "abema"].map(key => Object({ [`valid_${key}`]: false })))
-const checkValid2=Object.assign(...["danime","amazon", "abema"].map(key => 
-        Object({[`valid_${key}Annict`]:true, [`valid_${key}Webhook`]:true, [`valid_${key}Genre`]:false})));
-const checkValid=Object.assign(checkValid1, checkValid2);
+const amazonAbemaDefaults: any[] = ["amazon", "abema"].map(key => ({ [`valid_${key}`]: false }));
+const checkValid1 = Object.assign({ "valid_danime": true }, ...amazonAbemaDefaults);
+const vodDefaults: any[] = ["danime","amazon", "abema"].map(key =>
+        ({[`valid_${key}Annict`]:true, [`valid_${key}Webhook`]:true, [`valid_${key}Genre`]:false}));
+const checkValid2 = Object.assign({}, ...vodDefaults);
+const checkValid = Object.assign(checkValid1, checkValid2);
 const otherKeys = {
     input: { token: "", sendingTime: 300 },
     check: Object.assign({ annictSend: true, withTwitter:false, withFacebook:false}, checkValid)
-}
+};
 
 // Initialize when DOM is ready
 (function () {
@@ -37,15 +52,15 @@ function init() {
     // set value
     chrome.storage.sync.get(otherKeys.input, items =>
         Object.entries(items).forEach(kv => {
-            const elem = document.querySelector(`#input_${kv[0]}`);
-            if (elem) elem.value = kv[1];
+            const elem = document.querySelector<HTMLInputElement>(`#input_${kv[0]}`);
+            if (elem) elem.value = kv[1] as string;
         })
     );
     chrome.storage.sync.get(otherKeys.check, items => {
         //console.log(items)
         Object.entries(items).forEach(kv => {
-            const elem = document.querySelector(`#check_${kv[0]}`);
-            if (elem) elem.checked = kv[1];
+            const elem = document.querySelector<HTMLInputElement>(`#check_${kv[0]}`);
+            if (elem) elem.checked = kv[1] as boolean;
         })
     });
     //-------------- webhook ---------------
@@ -62,19 +77,19 @@ function init() {
             const webhook_now = document.querySelector(`#webhook_${webhookNum}`);
             const webhookArea = webhook_now?.querySelector(".webhookContent");
             for (const key of webhookKeys.check) {
-                const val = webhookSettings[webhookNum][key];
-                if (val == "") continue;
-                const elem = webhook_now?.querySelector(`.check_${key}`);
-                if (elem) elem.checked = val;
+                const val = webhookSettings[webhookNum][key as keyof WebhookSetting];
+                if (val === "") continue;
+                const elem = webhook_now?.querySelector<HTMLInputElement>(`.check_${key}`);
+                if (elem) elem.checked = val as boolean;
             }
             for (const key of webhookKeys.input) {
-                const val = webhookSettings[webhookNum][key];
-                const elem = webhook_now?.querySelector(`.input_${key}`);
-                if (elem) elem.value = val;
+                const val = webhookSettings[webhookNum][key as keyof WebhookSetting];
+                const elem = webhook_now?.querySelector<HTMLInputElement>(`.input_${key}`);
+                if (elem) elem.value = val as string;
             }
             const webhookContent = webhookSettings[webhookNum].webhookContent;
             //console.log(webhookContent);
-            Object.entries(webhookContent).forEach((kv, ind) => {
+            Object.entries(webhookContent).forEach((kv: [string, string], ind) => {
                 //console.log(kv, ind)
                 if (ind > 0) {
                     const keyButtonNumber = ind;
@@ -104,8 +119,8 @@ function init() {
                     webhookArea?.appendChild(div_webhook);
                 } else {
                     const div_webhook = webhookArea?.querySelector(`.div_webhook_0`);
-                    const inputKey = div_webhook?.querySelector(".webhookKey");
-                    const inputValue = div_webhook?.querySelector(".webhookValue");
+                    const inputKey = div_webhook?.querySelector<HTMLInputElement>(".webhookKey");
+                    const inputValue = div_webhook?.querySelector<HTMLInputElement>(".webhookValue");
                     //console.log(div_webhook, inputKey, inputValue)
                     if (inputKey) inputKey.value = kv[0];
                     if (inputValue) inputValue.value = kv[1];
@@ -127,24 +142,30 @@ function init() {
 }
 })();
 
-document.addEventListener("click", function (e) {
-    const webhook_now = e.target.closest("[id^=webhook_]");
-    const clicked_class = e.target.className;
+document.addEventListener("click", function (e: MouseEvent) {
+    const target = e.target as HTMLElement;
+    if (!target) return;
+    const webhook_now = target.closest("[id^=webhook_]");
+    const clicked_class = target.className;
     //console.log(e.target)
     if (!clicked_class) return;
     //----------- not webhook ------------
     //get value
     if (!webhook_now) {
         if (clicked_class.indexOf("saveButton") != -1) {
-            const inputKey = e.target.id.match(/(?<=btn_)\S+/)[0];
-            const inputElem = document.querySelector(`#input_${inputKey}`);
+            const inputKeyMatch = target.id.match(/(?<=btn_)\S+/);
+            if (!inputKeyMatch) return;
+            const inputKey = inputKeyMatch[0];
+            const inputElem = document.querySelector<HTMLInputElement>(`#input_${inputKey}`);
             const inputContent = inputElem?.value || "";
             chrome.storage.sync.set({ [inputKey]: inputContent });
             showSimpleMessage("OK", "保存しました");
         }
         else if (clicked_class.indexOf("check_settings") != -1) {
-            const inputKey = e.target.id.match(/(?<=check_)\S+/)[0];
-            chrome.storage.sync.set({ [inputKey]: e.target.checked });
+            const inputKeyMatch = target.id.match(/(?<=check_)\S+/);
+            if (!inputKeyMatch) return;
+            const inputKey = inputKeyMatch[0];
+            chrome.storage.sync.set({ [inputKey]: (target as HTMLInputElement).checked });
         }  // add or delete block
         else if (clicked_class.indexOf("btn_webhookBlockAdd") != -1) {
             chrome.storage.sync.get({ webhookSettings: webhookDefaultString }, items => {
@@ -155,12 +176,14 @@ document.addEventListener("click", function (e) {
                 addWebhookBlock(webhookNewKey);
             })
         } else if (clicked_class.indexOf("btn_webhookBlockDelete") != -1) {
-            //const webhook_now = e.target.closest("[id^=webhook_]");
+            //const webhook_now = target.closest("[id^=webhook_]");
             //if (webhook_now) return;
-            const webhookNum = e.target.id.match(/(?<=btn_webhookBlockDelete_)\d+/)[0];
+            const webhookNumMatch = target.id.match(/(?<=btn_webhookBlockDelete_)\d+/);
+            if (!webhookNumMatch) return;
+            const webhookNum = webhookNumMatch[0];
             const deleted_block = document.querySelector(`#webhook_${webhookNum}`);
             deleted_block?.remove();
-            e.target.remove();
+            target.remove();
             chrome.storage.sync.get({ webhookSettings: webhookDefaultString }, items => {
                 let webhookSettings = checkWebhookSettings(items.webhookSettings);
 
@@ -182,12 +205,14 @@ document.addEventListener("click", function (e) {
         const webhookArea = webhook_now.querySelector(".webhookContent");
         // add or delete webhook content
         if (clicked_class.indexOf("deleteButton") != -1) {
-            const keyButtonNumber = clicked_class.match(/(?<=btn_webhookContentDelete_)\d+/)[0];
+            const keyButtonNumberMatch = clicked_class.match(/(?<=btn_webhookContentDelete_)\d+/);
+            if (!keyButtonNumberMatch) return;
+            const keyButtonNumber = keyButtonNumberMatch[0];
             const div_deleted = webhookArea?.querySelector(`.div_webhook_${keyButtonNumber}`);
             div_deleted?.remove();
         }
         else if (clicked_class.indexOf("btn_webhookContentAdd") != -1) {
-            const webhookKeys = webhookArea?.querySelectorAll(".webhookKey");
+            const webhookKeys = webhookArea?.querySelectorAll<HTMLInputElement>(".webhookKey");
             const oldKey = webhookKeys?.[webhookKeys.length - 1];
             if (!oldKey || oldKey.value == "") return;
             const keyButtonNumber = webhookKeys?.length || 0;
@@ -218,13 +243,13 @@ document.addEventListener("click", function (e) {
             webhookArea?.appendChild(div_webhook);
         }    // get value
         else if (clicked_class.indexOf("btn_webhookSave") != -1) {
-            const Keys = Array.from(webhookArea?.querySelectorAll(".webhookKey") || []).map(el => el.value);
-            const Values = Array.from(webhookArea?.querySelectorAll(".webhookValue") || []).map(el => el.value);
-            const webhookContent = Object.assign(...[...Array(Keys.length).keys()].map(ind => Object({ [Keys[ind]]: Values[ind] })));
-            const inputObjs = Object.assign(...webhookKeys.input.map(key => {
-                const elem = webhook_now?.querySelector(`.input_${key}`);
+            const Keys = Array.from(webhookArea?.querySelectorAll<HTMLInputElement>(".webhookKey") || []).map(el => el.value);
+            const Values = Array.from(webhookArea?.querySelectorAll<HTMLInputElement>(".webhookValue") || []).map(el => el.value);
+            const webhookContent = Object.assign({}, ...[...Array(Keys.length).keys()].map(ind => ({ [Keys[ind]]: Values[ind] })) as [object, ...object[]]);
+            const inputObjs = Object.assign({}, ...webhookKeys.input.map(key => {
+                const elem = webhook_now?.querySelector<HTMLInputElement>(`.input_${key}`);
                 return { [key]: elem?.value || "" };
-            }));
+            }) as [object, ...object[]]);
             chrome.storage.sync.get({ webhookSettings: webhookDefaultString }, items => {
                 let webhookSettings = checkWebhookSettings(items.webhookSettings);
                 webhookSettings[webhookNum].webhookContent = webhookContent;
@@ -234,8 +259,10 @@ document.addEventListener("click", function (e) {
             showSimpleMessage("OK", "保存しました");
         }
         else if (clicked_class.indexOf("custom-control-webhook-input") != -1) {
-            const checkKey = clicked_class.match(/(?<=check_)webhook\S+/)[0];
-            const checkVal = e.target.checked;
+            const checkKeyMatch = clicked_class.match(/(?<=check_)webhook\S+/);
+            if (!checkKeyMatch) return;
+            const checkKey = checkKeyMatch[0];
+            const checkVal = (target as HTMLInputElement).checked;
             chrome.storage.sync.get({ webhookSettings: webhookDefaultString }, items => {
                 let webhookSettings = checkWebhookSettings(items.webhookSettings);
                 webhookSettings[webhookNum][checkKey] = checkVal;
@@ -245,12 +272,13 @@ document.addEventListener("click", function (e) {
     }
 });
 
-function chainCheckBox(fromCheckbox, toCheckboxesIn, reverse=false){
+function chainCheckBox(fromCheckbox: HTMLInputElement | null, toCheckboxesIn: NodeListOf<Element> | Element[], reverse=false){
 
     //console.log({fromCheckbox, toCheckboxesIn, reverse})
+    if (!fromCheckbox) return;
     const toCheckboxes = Array.from(toCheckboxesIn);
     toCheckboxes.forEach(checkbox=>{
-        checkbox.disabled= (fromCheckbox.checked == reverse)
+        (checkbox as HTMLInputElement).disabled= (fromCheckbox.checked == reverse)
     })
 }
 
@@ -329,14 +357,14 @@ function addWebhookBlock(webhookNum) {
     optionMenu?.appendChild(webhookBlock);
 }
 
-function checkWebhookSettings(webhookSettingsTmp) {
-    let webhookSettings = {};
+function checkWebhookSettings(webhookSettingsTmp: string | any): any {
+    let webhookSettings: any = {};
     try { webhookSettings = JSON.parse(webhookSettingsTmp); }
     catch (e) {
         try {
-            webhookSettings = Object.assign(...[...Array(webhookSettingsTmp.length).keys()]
-                .map(key => Object({ [key]: webhookSettingsTmp[key] })));
+            webhookSettings = Object.assign({}, ...[...Array(webhookSettingsTmp.length).keys()]
+                .map(key => ({ [key]: webhookSettingsTmp[key] })) as [object, ...object[]]);
         } catch (e) { webhookSettings = JSON.parse(webhookDefaultString); }
     }
     return webhookSettings;
-}
+}export {};
