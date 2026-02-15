@@ -33,6 +33,51 @@ Details on [Quick Tutorial](https://hackmd.io/@ystl/Hy1h_mqcv/%2FQRGRL9xxT7G9isw
 
 2021/2/17追記: 複数話を1つにまとめる作品に対応しました。
 
+## Development
+
+### Requirements
+- Node.js (v14 or later)
+- npm
+
+### Setup
+```bash
+npm install
+cd tests && npm install
+```
+
+### Build
+```bash
+# Build all (TypeScript + SCSS + copy static files)
+npm run build
+
+# Build TypeScript only
+npm run build:ts
+
+# Build SCSS only
+npm run build:css
+
+# Copy static files only
+npm run build:copy
+```
+
+### Watch mode (for development)
+```bash
+# Watch TypeScript and SCSS changes
+npm run watch
+```
+
+### Load extension in Chrome
+1. Run `npm run build` to generate the `dist` directory
+2. Open Chrome and go to `chrome://extensions/`
+3. Enable "Developer mode"
+4. Click "Load unpacked" and select the `dist` directory
+
+### Tech Stack
+- TypeScript (migrated from JavaScript)
+- SCSS (migrated from CSS)
+- Chrome Extension Manifest V3
+- Native JavaScript (no jQuery, Bootstrap, or other dependencies)
+
 ## Reference
 
 - [kakunpc / danime-save-annict](https://github.com/kakunpc/danime-save-annict)
