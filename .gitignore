@@ -3,3 +3,5 @@
 *Zone.Identifier
 .env
 wiki/
+node_modules/
+dist/

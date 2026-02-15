@@ -1,0 +1,28 @@
+.dsa-dialog {
+  position: fixed;
+  bottom: 60px;
+  right: 10px;
+  border: 1px solid #888888;
+  padding: 2pt;
+  background-color: #ffffff;
+  opacity: 0.85;
+  text-shadow: 0 -1px 1px #FFF, -1px 0 1px #FFF, 1px 0 1px #aaa;
+  box-shadow: 1px 1px 2px #eeeeee;
+  border-radius: 3px;
+  display: none;
+  transition: opacity 0.6s;
+}
+
+.dsa-dialog-show {
+  display: block;
+}
+
+.dsa-dialog-fade-in {
+  opacity: 0.85;
+}
+
+.dsa-dialog-fade-out {
+  opacity: 0;
+}
+
+/*# sourceMappingURL=notifications.css.map */

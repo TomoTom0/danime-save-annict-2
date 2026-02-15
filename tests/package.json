@@ -1,0 +1,65 @@
+{
+  "name": "danime-save-annict-2-tests",
+  "version": "0.6.4.0",
+  "description": "テストスイート for danime-save-annict-2 Chrome拡張機能",
+  "private": true,
+  "scripts": {
+    "test": "jest",
+    "test:unit": "jest unit/",
+    "test:integration": "jest integration/",
+    "test:e2e": "playwright test",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --watchAll=false",
+    "lint": "eslint **/*.js",
+    "playwright:install": "playwright install"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.0.0",
+    "@playwright/test": "^1.40.0",
+    "eslint": "^8.50.0",
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^29.0.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFilesAfterEnv": ["<rootDir>/setup.js"],
+    "collectCoverageFrom": [
+      "../dist/scripts/**/*.js",
+      "!../dist/scripts/**/*.test.js"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": [
+      "html",
+      "text",
+      "lcov"
+    ],
+    "testMatch": [
+      "**/unit/**/*.test.js",
+      "**/integration/**/*.test.js"
+    ]
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "es2021": true,
+      "jest": true,
+      "webextensions": true
+    },
+    "extends": [
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2021,
+      "sourceType": "module"
+    },
+    "globals": {
+      "chrome": "readonly"
+    },
+    "rules": {
+      "no-unused-vars": "error",
+      "no-undef": "error",
+      "no-console": "warn"
+    }
+  }
+}
