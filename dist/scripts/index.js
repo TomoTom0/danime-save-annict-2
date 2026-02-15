@@ -309,7 +309,7 @@ function obtainWatching(videoSite, genreLimit = true) {
 // -------------------------------------------------
 async function obtainWork(WatchingEpisode, annictToken) {
     const IsCombinedEpisode = (/～|／/.test(WatchingEpisode.episodeNumber) &&
-        WatchingEpisode.episodeNumber.split(/～|／/g).every(d => title2number(remakeString(d, "episodeNumber"))) != null);
+        WatchingEpisode.episodeNumber.split(/～|／/g).every(d => isFinite(title2number(remakeString(d, "episodeNumber")))));
     if (!IsCombinedEpisode) {
         return await identifyWork(WatchingEpisode, annictToken);
     }
@@ -320,12 +320,16 @@ async function obtainWork(WatchingEpisode, annictToken) {
         const episodeNumbers = [...Array(episodeRange[1] - episodeRange[0] + 1).keys()].map(num => num + episodeRange[0]);
         let workInfos = [];
         for (const number of episodeNumbers) {
-            const episodeNow = Object.assign({
+            const episodeNow = {
+                site: WatchingEpisode.site,
+                workTitle: WatchingEpisode.workTitle,
+                genre: WatchingEpisode.genre,
+                workId: WatchingEpisode.workId,
+                workIds: WatchingEpisode.workIds,
                 episodeTitle: "",
                 episodeNumber: `${number}`,
-                number: number
-            }, ...["site", "workTitle", "genre", "workId", "workIds"]
-                .map(key => ({ [key]: WatchingEpisode[key] })));
+                number: number,
+            };
             const workInfoTmp = await identifyWork(episodeNow, annictToken);
             if (workInfoTmp && workInfoTmp.nodes && workInfoTmp.nodes.length > 0)
                 workInfos.push(workInfoTmp);

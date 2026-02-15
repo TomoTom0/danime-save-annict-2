@@ -362,7 +362,7 @@ function obtainWatching(videoSite: string, genreLimit = true): WatchingEpisode |
 
 async function obtainWork(WatchingEpisode: WatchingEpisode, annictToken: string): Promise<WorkInfo> {
     const IsCombinedEpisode = (/～|／/.test(WatchingEpisode.episodeNumber) &&
-        WatchingEpisode.episodeNumber.split(/～|／/g).every(d => title2number(remakeString(d, "episodeNumber"))) != null);
+        WatchingEpisode.episodeNumber.split(/～|／/g).every(d => isFinite(title2number(remakeString(d, "episodeNumber")))));
     if (!IsCombinedEpisode) {
         return await identifyWork(WatchingEpisode, annictToken);
     } else {
@@ -372,12 +372,16 @@ async function obtainWork(WatchingEpisode: WatchingEpisode, annictToken: string)
         const episodeNumbers = [...Array(episodeRange[1] - episodeRange[0] + 1).keys()].map(num => num + episodeRange[0]);
         let workInfos: WorkInfo[] = [];
         for (const number of episodeNumbers) {
-            const episodeNow = Object.assign({
+            const episodeNow: WatchingEpisode = {
+                site: WatchingEpisode.site,
+                workTitle: WatchingEpisode.workTitle,
+                genre: WatchingEpisode.genre,
+                workId: WatchingEpisode.workId,
+                workIds: WatchingEpisode.workIds,
                 episodeTitle: "",
                 episodeNumber: `${number}`,
-                number: number
-            }, ...["site", "workTitle", "genre", "workId", "workIds"]
-                .map(key => ({ [key]: WatchingEpisode[key as keyof WatchingEpisode] }))) as WatchingEpisode;
+                number: number,
+            };
 
             const workInfoTmp = await identifyWork(episodeNow, annictToken);
             if (workInfoTmp && workInfoTmp.nodes && workInfoTmp.nodes.length > 0) workInfos.push(workInfoTmp);
@@ -541,7 +545,7 @@ function remakeString(input_str: string | null | undefined, mode = "title"): str
         return input_str.replace(/[Ａ-Ｚａ-ｚ０-９：]/g, s => // 全角=>半角
             String.fromCharCode(s.charCodeAt(0) - 65248))
             .replace(new RegExp(delete_array.join("|"), "g"), "")
-            .replace(new RegExp(Object.keys(remake_dic).join("|"), "g"), match => remake_dic[match]);
+            .replace(new RegExp(Object.keys(remake_dic).join("|"), "g"), match => remake_dic[match as keyof typeof remake_dic]);
     }
 }
 

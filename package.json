@@ -6,7 +6,7 @@
     "build": "npm run build:ts && npm run build:css && npm run build:copy",
     "build:ts": "tsc",
     "build:css": "sass src/styles:dist/styles",
-    "build:copy": "cp -r src/html dist/ && cp -r src/img dist/ && cp src/manifest.json dist/",
+    "build:copy": "cpx 'src/html/**/*' dist/html && cpx 'src/img/**/*' dist/img && cpx 'src/manifest.json' dist",
     "watch": "npm run watch:ts & npm run watch:css",
     "watch:ts": "tsc --watch",
     "watch:css": "sass --watch src/styles:dist/styles",
@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "@types/chrome": "^0.0.268",
+    "cpx": "^1.5.0",
     "sass": "^1.77.0",
     "typescript": "^5.4.5"
   },

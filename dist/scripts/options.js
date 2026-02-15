@@ -185,7 +185,10 @@ document.addEventListener("click", function (e) {
             .forEach(d => chainCheckBox(d[0], d[1]));
     } //----------- webhook content ------------
     else {
-        const webhookNum = webhook_now.id.match(/(?<=webhook_)\d+/)[0];
+        const webhookNumMatch = webhook_now.id.match(/(?<=webhook_)\d+/);
+        if (!webhookNumMatch)
+            return;
+        const webhookNum = webhookNumMatch[0];
         const webhookArea = webhook_now.querySelector(".webhookContent");
         // add or delete webhook content
         if (clicked_class.indexOf("deleteButton") != -1) {
@@ -208,12 +211,10 @@ document.addEventListener("click", function (e) {
             inputKey.type = "text";
             inputKey.className = "webhookKey form-control";
             inputKey.placeholder = "key";
-            inputKey.style.cssText = "width: 15%; display: inline;";
             const inputValue = document.createElement("input");
             inputValue.type = "text";
             inputValue.className = "webhookValue form-control";
             inputValue.placeholder = "value";
-            inputValue.style.cssText = "width: 60%; display: inline;";
             const deleteButton = document.createElement("button");
             deleteButton.className = `btn_webhookContentDelete_${keyButtonNumber} deleteButton btn btn-primary`;
             deleteButton.type = "button";

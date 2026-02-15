@@ -201,7 +201,9 @@ document.addEventListener("click", function (e: MouseEvent) {
         
     } //----------- webhook content ------------
     else {
-        const webhookNum = webhook_now.id.match(/(?<=webhook_)\d+/)[0];
+        const webhookNumMatch = webhook_now.id.match(/(?<=webhook_)\d+/);
+        if (!webhookNumMatch) return;
+        const webhookNum = webhookNumMatch[0];
         const webhookArea = webhook_now.querySelector(".webhookContent");
         // add or delete webhook content
         if (clicked_class.indexOf("deleteButton") != -1) {
@@ -224,13 +226,11 @@ document.addEventListener("click", function (e: MouseEvent) {
             inputKey.type = "text";
             inputKey.className = "webhookKey form-control";
             inputKey.placeholder = "key";
-            inputKey.style.cssText = "width: 15%; display: inline;";
 
             const inputValue = document.createElement("input");
             inputValue.type = "text";
             inputValue.className = "webhookValue form-control";
             inputValue.placeholder = "value";
-            inputValue.style.cssText = "width: 60%; display: inline;";
 
             const deleteButton = document.createElement("button");
             deleteButton.className = `btn_webhookContentDelete_${keyButtonNumber} deleteButton btn btn-primary`;
@@ -357,8 +357,8 @@ function addWebhookBlock(webhookNum) {
     optionMenu?.appendChild(webhookBlock);
 }
 
-function checkWebhookSettings(webhookSettingsTmp: string | any): any {
-    let webhookSettings: any = {};
+function checkWebhookSettings(webhookSettingsTmp: string | any): WebhookSettings {
+    let webhookSettings: WebhookSettings = {};
     try { webhookSettings = JSON.parse(webhookSettingsTmp); }
     catch (e) {
         try {
