@@ -5,3 +5,4 @@
 wiki/
 node_modules/
 dist/
+src/scripts/*.js
