@@ -43,7 +43,7 @@ describe('Extension Workflow Integration Tests', () => {
     test('should find video element', () => {
       const video = document.querySelector('#video');
       expect(video).not.toBeNull();
-      expect(video.tagName).toBe('VIDEO');
+      expect(video!.tagName).toBe('VIDEO');
     });
   });
 
@@ -94,7 +94,7 @@ describe('Extension Workflow Integration Tests', () => {
 
     test('should extract episode information from Abema page', () => {
       const jsonScript = document.querySelector('script[type="application/ld+json"]');
-      const jsonData = JSON.parse(jsonScript.innerHTML);
+      const jsonData = JSON.parse(jsonScript!.innerHTML);
 
       expect(jsonData.itemListElement).toHaveLength(4);
       expect(jsonData.itemListElement[1].name).toBe('アニメ');

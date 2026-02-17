@@ -28,24 +28,23 @@ const otherKeys = {
     else {
         init();
     }
-    function init() {
-        //------ not webhook ---------
-        // set value
+    function loadInputSettings() {
         chrome.storage.sync.get(otherKeys.input, items => Object.entries(items).forEach(kv => {
             const elem = document.querySelector(`#input_${kv[0]}`);
             if (elem)
                 elem.value = kv[1];
         }));
+    }
+    function loadCheckboxSettings() {
         chrome.storage.sync.get(otherKeys.check, items => {
-            //console.log(items)
             Object.entries(items).forEach(kv => {
                 const elem = document.querySelector(`#check_${kv[0]}`);
                 if (elem)
                     elem.checked = kv[1];
             });
         });
-        //-------------- webhook ---------------
-        // set value
+    }
+    function loadWebhookSettings() {
         chrome.storage.sync.get({ webhookSettings: webhookDefaultString }, items => {
             const webhookSettings = checkWebhookSettings(items.webhookSettings);
             let firstBlock = true;
@@ -116,12 +115,20 @@ const otherKeys = {
                 });
             });
         });
+    }
+    function setupCheckboxChains() {
         setTimeout(() => {
             ([].concat(["danime", "amazon", "abema"].map(vod => [`valid_${vod}`, [`valid_${vod}Annict`, `valid_${vod}Webhook`, `valid_${vod}Genre`]]), [[`annictSend`, ["danime", "amazon", "abema"]
                         .map(vod => `valid_${vod}Annict`).concat(["withTwitter", "withFacebook"])]]))
-                .map(d => [document.querySelector(`#check_${d[0]}`), d[1].map(dd => document.querySelector(`#check_${dd}`))])
-                .forEach(d => chainCheckBox(d[0], d[1]));
+                .map((d) => [document.querySelector(`#check_${d[0]}`), d[1].map((dd) => document.querySelector(`#check_${dd}`))])
+                .forEach((d) => chainCheckBox(d[0], d[1]));
         }, 10);
+    }
+    function init() {
+        loadInputSettings();
+        loadCheckboxSettings();
+        loadWebhookSettings();
+        setupCheckboxChains();
     }
 })();
 document.addEventListener("click", function (e) {
@@ -181,8 +188,8 @@ document.addEventListener("click", function (e) {
         ;
         ([].concat(["danime", "amazon", "abema"].map(vod => [`valid_${vod}`, [`valid_${vod}Annict`, `valid_${vod}Webhook`, `valid_${vod}Genre`]]), [[`annictSend`, ["danime", "amazon", "abema"]
                     .map(vod => `valid_${vod}Annict`).concat(["withTwitter", "withFacebook"])]]))
-            .map(d => [document.querySelector(`#check_${d[0]}`), d[1].map(dd => document.querySelector(`#check_${dd}`))])
-            .forEach(d => chainCheckBox(d[0], d[1]));
+            .map((d) => [document.querySelector(`#check_${d[0]}`), d[1].map((dd) => document.querySelector(`#check_${dd}`))])
+            .forEach((d) => chainCheckBox(d[0], d[1]));
     } //----------- webhook content ------------
     else {
         const webhookNumMatch = webhook_now.id.match(/(?<=webhook_)\d+/);
@@ -263,16 +270,16 @@ function chainCheckBox(fromCheckbox, toCheckboxesIn, reverse = false) {
         checkbox.disabled = (fromCheckbox.checked == reverse);
     });
 }
-function addWebhookBlock(webhookNum) {
-    //console.log(webhookNum)
-    if (document.querySelector(`#webhook_${webhookNum}`))
-        return;
+function createDeleteButton(webhookNum) {
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "btn_webhookBlockDelete btn btn-primary";
     deleteButton.id = `btn_webhookBlockDelete_${webhookNum}`;
     deleteButton.textContent = "Webhook設定を削除";
-    const webhook_blockHtml = `<div class="well bs-component" id="webhook_${webhookNum}">
+    return deleteButton;
+}
+function getWebhookBlockHtml(webhookNum) {
+    return `<div class="well bs-component" id="webhook_${webhookNum}">
     <form class="form-horizontal">
         <div class="form-group">
             <label class="col-lg-2 control-label">Webhook Post URL</label>
@@ -327,12 +334,18 @@ function addWebhookBlock(webhookNum) {
         </div>
     </form>
 </div>`;
+}
+function addWebhookBlock(webhookNum) {
+    if (document.querySelector(`#webhook_${webhookNum}`))
+        return;
     const optionMenu = document.querySelector("#extraWebhook");
+    const deleteButton = createDeleteButton(webhookNum);
     optionMenu?.appendChild(deleteButton);
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = webhook_blockHtml;
+    tempDiv.innerHTML = getWebhookBlockHtml(webhookNum);
     const webhookBlock = tempDiv.firstElementChild;
-    optionMenu?.appendChild(webhookBlock);
+    if (webhookBlock)
+        optionMenu?.appendChild(webhookBlock);
 }
 function checkWebhookSettings(webhookSettingsTmp) {
     let webhookSettings = {};
