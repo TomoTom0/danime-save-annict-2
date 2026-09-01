@@ -6,15 +6,30 @@ danime-save-annict-2 Chrome拡張機能のテストスイートです。
 
 ```
 tests/
-├── setup.js                 # Jestセットアップファイル（グローバルモック、ヘルパー関数）
-├── unit/                    # ユニットテスト
-│   ├── index.test.js        # 主要ロジックのテスト
-│   └── options.test.js      # オプション画面のテスト
-├── integration/             # 統合テスト
-│   └── workflow.test.js     # 全体ワークフローのテスト
-└── e2e/                     # E2Eテスト（Playwright）
-    └── extension.test.js    # 拡張機能全体のE2Eテスト
+├── setup.ts                 # Jestセットアップファイル（グローバルモック、ヘルパー関数）
+├── playwright.config.ts     # PlaywrightのE2E設定（testDirをe2e/に限定、tests/unitとの衝突を回避）
+├── unit/                    # ユニットテスト（*.test.ts）
+├── integration/             # 統合テスト（*.test.ts）
+└── e2e/                     # E2Eテスト（Playwright, *.spec.ts）
+    ├── fixtures.ts           # dist/を拡張機能として読み込むcontextのfixture
+    ├── options.spec.ts       # オプション画面のE2Eテスト
+    └── content-script.spec.ts # content scriptの注入確認（danime/amazon/abema）
 ```
+
+### E2Eテストに関する既知の制約
+
+E2Eテストは`chromium.launchPersistentContext`で`dist/`を`--load-extension`で読み込む方式を採る。
+**開発環境によっては、Chromeのバージョン/ビルドによりこのCLIフラグでの拡張機能読み込みが無視されることがある**
+（2026-09時点でこのプロジェクトのローカル開発環境で確認済み。組み込みのコンポーネント拡張機能は登録されるが、
+unpackedな`--load-extension`だけがエラーなく黙って無視される事象）。試したが解決しなかった対処法:
+
+- `--headless=new` / レガシー`--headless` / `headless:false`+実ディスプレイ
+- `--disable-features=DisableLoadExtensionCommandLineSwitch`
+- プロファイルへの`developer_mode: true`事前設定
+- CDP `Extensions.loadUnpacked`（未実装の場合あり）
+
+CI環境やChromeバージョンによっては問題なく動作する可能性があるため、`npm run test:e2e`が失敗する場合は
+まずこの既知の制約を疑うこと。
 
 ## セットアップ
 
@@ -107,6 +122,6 @@ npm run test:ci
 
 ## 注意事項
 
-- テストは TypeScript コンパイル後の JavaScript ファイル（`dist/scripts/`）を対象としています
-- テスト実行前に `npm run build` を実行してください
-- Chrome拡張機能の実行環境を jsdom でシミュレートしています
+- ユニット・統合テストは `src/` 配下の TypeScript を ts-jest で直接実行します（`dist/` は対象外）
+- E2Eテストは `dist/` を拡張機能として読み込むため、実行前に必ずプロジェクトルートで `npm run build` を実行してください
+- Chrome拡張機能の実行環境を jsdom でシミュレートしています（E2Eテストのみ実ブラウザを使用）
