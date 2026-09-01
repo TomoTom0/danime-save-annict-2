@@ -7,28 +7,30 @@ danime-save-annict-2 Chrome拡張機能のテストスイートです。
 ```
 tests/
 ├── setup.ts                 # Jestセットアップファイル（グローバルモック、ヘルパー関数）
-├── playwright.config.ts     # Playwrightのブラウザ結合テスト設定（testDirをbrowser/に限定、tests/unitとの衝突を回避）
+├── playwright.config.ts     # PlaywrightのE2E設定（testDirをe2e/に限定、tests/unitとの衝突を回避）
 ├── unit/                    # ユニットテスト（*.test.ts）
 ├── integration/             # 統合テスト（*.test.ts, jsdom）
-└── browser/                 # ブラウザ結合テスト（Playwright, *.spec.ts）
+└── e2e/                     # E2Eテスト（Playwright, 実Chromeで拡張機能を実行, *.spec.ts）
     ├── fixtures.ts           # dist/を拡張機能として読み込むcontextのfixture
-    ├── options.spec.ts       # オプション画面が実Chromeで開けるかの結合テスト
-    └── content-script.spec.ts # content scriptが実サイトDOM相当のフィクスチャから正しく視聴情報を抽出しAnnictへ送信するかの結合テスト（danime/amazon/abema）
+    ├── options.spec.ts       # オプション画面が実Chromeで開けるか
+    └── content-script.spec.ts # content scriptが実サイトDOM相当のフィクスチャから正しく視聴情報を抽出しAnnictへ送信するか（danime/amazon/abema）
 ```
 
-### テストの位置づけ（重要）
+### E2Eテストで何が実物で何がスタブか（重要）
 
-このプロジェクトのテストは3階層あり、**「ブラウザ結合テスト」を安易に「E2E」と呼ばないこと**。
+拡張機能自体(`dist/`をビルドして`--load-extension`で読み込み)・content scriptの注入・Chrome拡張機能API(`chrome.storage`等)は全て実物。
+一方、以下はまだスタブ/フィクスチャに置き換えている:
 
-| 階層 | 実行環境 | 外部依存 | 検証範囲 |
-|---|---|---|---|
-| ユニット/統合テスト | jsdom | 全てモック | 個々の関数・モジュールのロジック |
-| **ブラウザ結合テスト**(`tests/browser/`) | 実Chrome(拡張機能として`dist/`を読み込み) | サイトDOMはフィクスチャ、Annict APIはモック(`context.route()`) | 拡張機能が実Chrome環境で正しくビルド・注入・実行され、フィクスチャDOMから視聴情報を抽出してAnnictへの送信ペイロードを正しく組み立てられるか |
-| **E2E**(未実装、TASK-33) | 実Chrome | 実際のdアニメストア/Amazon Prime Video/AbemaTVの実アカウント、実Annictテストアカウント | ユーザーが実際に動画を見る→拡張機能が検知→Annictに実送信、という一連の実フロー |
+- **サイト側DOM**: dアニメストア/Amazon Prime Video/AbemaTVの実ページには一切アクセスせず、`context.route()`で
+  各サイトの実DOM構造を模したフィクスチャHTMLを返している(ユニットテストのフィクスチャと同じ構造)。
+- **Annict API**: `https://api.annict.com/graphql`への検索リクエストを`context.route()`でスタブし、実際には
+  送信されない。リクエストの中身(抽出したタイトルが検索クエリに正しく載っているか)は検証している。
 
-d アニメストア/Amazon Prime Video/AbemaTVはいずれも要ログインの有料サービスであり、真のE2Eには実アカウントの認証情報が必須のため、Claude側で勝手に用意することはできない。TASK-33としてユーザー提供の実アカウント情報待ちで記録している。
+d アニメストア/Amazon Prime Video/AbemaTVはいずれも要ログインの有料サービスであり、サイト側DOM・Annict API
+双方を実物にするには実アカウントの認証情報が必須で、Claude側で勝手に用意することはできない。TASK-33として
+ユーザー提供の実アカウント情報待ちで記録している。
 
-### ブラウザ結合テスト実行時の注意点
+### E2Eテスト実行時の注意点
 
 `chromium.launchPersistentContext`で`dist/`を`--load-extension`で読み込む方式を採る。
 
@@ -36,7 +38,7 @@ d アニメストア/Amazon Prime Video/AbemaTVはいずれも要ログインの
   レガシー`--headless`でも拡張機能は読み込まれない)。そのため`fixtures.ts`は`headless: false`固定。
   ディスプレイのない環境(CI、WSL2等)では`xvfb-run`で仮想ディスプレイを用意して実行すること:
   ```bash
-  npm run test:browser:xvfb
+  npm run test:e2e:xvfb
   ```
 - **拡張機能IDの解決はプロファイルの`Preferences`ファイルではなく`chrome://extensions`のDOMから行う**。
   `Preferences`ファイルはheadfulでも拡張機能読み込み後すぐには書き込まれず(環境によっては数秒待っても
@@ -69,10 +71,10 @@ npm run test:unit
 # 統合テストのみ
 npm run test:integration
 
-# ブラウザ結合テストのみ（事前にプロジェクトルートで npm run build が必要）
-npm run test:browser
+# E2Eテストのみ（事前にプロジェクトルートで npm run build が必要）
+npm run test:e2e
 # ディスプレイのない環境（CI、WSL2等）では
-npm run test:browser:xvfb
+npm run test:e2e:xvfb
 
 # ウォッチモード
 npm run test:watch
@@ -147,5 +149,5 @@ npm run test:ci
 ## 注意事項
 
 - ユニット・統合テストは `src/` 配下の TypeScript を ts-jest で直接実行します（`dist/` は対象外）
-- ブラウザ結合テストは `dist/` を拡張機能として読み込むため、実行前に必ずプロジェクトルートで `npm run build` を実行してください
-- Chrome拡張機能の実行環境を jsdom でシミュレートしています（ブラウザ結合テストのみ実Chromeを使用）
+- E2Eテストは `dist/` を拡張機能として読み込むため、実行前に必ずプロジェクトルートで `npm run build` を実行してください
+- Chrome拡張機能の実行環境を jsdom でシミュレートしています（E2Eテストのみ実Chromeを使用）
