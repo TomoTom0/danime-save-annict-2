@@ -7,16 +7,16 @@ danime-save-annict-2 Chrome拡張機能のテストスイートです。
 ```
 tests/
 ├── setup.ts                 # Jestセットアップファイル（グローバルモック、ヘルパー関数）
-├── playwright.config.ts     # Playwright設定（testDirをchrome-extension/に限定、tests/unitとの衝突を回避）
+├── playwright.config.ts     # Playwright設定（testDirをintegration-chrome/に限定、tests/unitとの衝突を回避）
 ├── unit/                    # ユニットテスト（*.test.ts）
 ├── integration/             # 統合テスト（*.test.ts, jsdom）
-└── chrome-extension/        # 結合テスト。実Chromeにビルド済み拡張機能を読み込んで動かす（Playwright, *.spec.ts）
+└── integration-chrome/      # 結合テスト。実Chromeにビルド済み拡張機能を読み込んで動かす（Playwright, *.spec.ts）
     ├── fixtures.ts           # dist/を拡張機能として読み込むcontextのfixture
     ├── options.spec.ts       # オプション画面が実Chromeで開けるか
     └── content-script.spec.ts # content scriptが実サイトDOM相当のフィクスチャから正しく視聴情報を抽出しAnnictへ送信するか（danime/amazon/abema）
 ```
 
-### tests/chrome-extension/ は結合テストである
+### tests/integration-chrome/ は結合テストである
 
 `tests/integration/`（jsdom）と同じ**結合テスト**の一種。実行環境が実Chromeである点が異なるだけで、
 外部サービスとの境界をスタブしている（＝実サービスの「end」には到達していない）以上、E2Eではなく結合テスト
@@ -46,7 +46,7 @@ d アニメストア/Amazon Prime Video/AbemaTVはいずれも要ログインの
   レガシー`--headless`でも拡張機能は読み込まれない)。そのため`fixtures.ts`は`headless: false`固定。
   ディスプレイのない環境(CI、WSL2等)では`xvfb-run`で仮想ディスプレイを用意して実行すること:
   ```bash
-  npm run test:chrome-extension:xvfb
+  npm run test:integration-chrome:xvfb
   ```
 - **拡張機能IDの解決はプロファイルの`Preferences`ファイルではなく`chrome://extensions`のDOMから行う**。
   `Preferences`ファイルはheadfulでも拡張機能読み込み後すぐには書き込まれず(環境によっては数秒待っても
@@ -80,9 +80,9 @@ npm run test:unit
 npm run test:integration
 
 # 実Chromeに拡張機能を読み込んで動かすテストのみ（事前にプロジェクトルートで npm run build が必要）
-npm run test:chrome-extension
+npm run test:integration-chrome
 # ディスプレイのない環境（CI、WSL2等）では
-npm run test:chrome-extension:xvfb
+npm run test:integration-chrome:xvfb
 
 # ウォッチモード
 npm run test:watch
@@ -157,5 +157,5 @@ npm run test:ci
 ## 注意事項
 
 - ユニット・統合テストは `src/` 配下の TypeScript を ts-jest で直接実行します（`dist/` は対象外）
-- `tests/chrome-extension/`配下のテストは `dist/` を拡張機能として読み込むため、実行前に必ずプロジェクトルートで `npm run build` を実行してください
-- Chrome拡張機能の実行環境を jsdom でシミュレートしています（`tests/chrome-extension/`配下のみ実Chromeを使用）
+- `tests/integration-chrome/`配下のテストは `dist/` を拡張機能として読み込むため、実行前に必ずプロジェクトルートで `npm run build` を実行してください
+- Chrome拡張機能の実行環境を jsdom でシミュレートしています（`tests/integration-chrome/`配下のみ実Chromeを使用）

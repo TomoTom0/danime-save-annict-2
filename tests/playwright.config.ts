@@ -1,7 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-    testDir: './chrome-extension',
+    testDir: './integration-chrome',
     testMatch: '**/*.spec.ts',
     fullyParallel: false,
     workers: 1,
