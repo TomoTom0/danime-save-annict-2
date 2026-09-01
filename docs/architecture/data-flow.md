@@ -67,7 +67,12 @@
     +-- nodes.length == 0 --> エラー通知 + Webhook送信(noWorkMatched等)
     |
     v (nodes.length > 0)
-[index.ts] 5分後に sendRecord 実行 (sendingTime後)
+[index.ts] sendingTime秒後(デフォルト300秒=5分)にsendRecord実行
+    |  video要素のendedイベントは送信トリガーとして使わない(意図的)
+    |  理由: サイトによってはplay/playingイベントが信頼できない(Abema等)ため、
+    |        固定時間待機のみを唯一の送信経路とする設計
+    |  ended発生時はRecordWillBeSent=falseで送信をブロックし、
+    |  lastVideoOverの更新のみ行う(Amazon作品ページでの二重送信防止、eaaa8d8由来)
     |
     v
 [index.ts] 重複チェック
