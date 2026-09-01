@@ -38,7 +38,9 @@
     |
     v
 [index.ts] 動画要素 (video) の存在確認
-    |  存在しない or 未再生 → スキップ
+    |  存在しない or WatchingEpisodeが空 → スキップ
+    |  (Amazonのみ) video.played.length == 0 (未再生) → スキップ
+    |    一覧ページで「続きのエピソード」用のvideo要素が先に用意されるため
     |
     v
 [api/annict.ts] obtainWork(WatchingEpisode, token)
