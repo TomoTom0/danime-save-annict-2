@@ -8,6 +8,7 @@
     "test:unit": "jest --config jest.config.js unit/",
     "test:integration": "jest --config jest.config.js integration/",
     "test:e2e": "playwright test",
+    "test:e2e:xvfb": "xvfb-run -a playwright test",
     "test:watch": "jest --config jest.config.js --watch",
     "test:coverage": "jest --config jest.config.js --coverage",
     "test:ci": "jest --config jest.config.js --ci --coverage --watchAll=false",

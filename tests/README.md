@@ -16,20 +16,22 @@ tests/
     └── content-script.spec.ts # content scriptの注入確認（danime/amazon/abema）
 ```
 
-### E2Eテストに関する既知の制約
+### E2Eテスト実行時の注意点
 
 E2Eテストは`chromium.launchPersistentContext`で`dist/`を`--load-extension`で読み込む方式を採る。
-**開発環境によっては、Chromeのバージョン/ビルドによりこのCLIフラグでの拡張機能読み込みが無視されることがある**
-（2026-09時点でこのプロジェクトのローカル開発環境で確認済み。組み込みのコンポーネント拡張機能は登録されるが、
-unpackedな`--load-extension`だけがエラーなく黙って無視される事象）。試したが解決しなかった対処法:
 
-- `--headless=new` / レガシー`--headless` / `headless:false`+実ディスプレイ
-- `--disable-features=DisableLoadExtensionCommandLineSwitch`
-- プロファイルへの`developer_mode: true`事前設定
-- CDP `Extensions.loadUnpacked`（未実装の場合あり）
+- **`--load-extension`はheadlessモードでは無視される**(Chrome自体の既知の制限。`--headless=new`はもちろん
+  レガシー`--headless`でも拡張機能は読み込まれない)。そのため`fixtures.ts`は`headless: false`固定。
+  ディスプレイのない環境(CI、WSL2等)では`xvfb-run`で仮想ディスプレイを用意して実行すること:
+  ```bash
+  npm run test:e2e:xvfb
+  ```
+- **拡張機能IDの解決はプロファイルの`Preferences`ファイルではなく`chrome://extensions`のDOMから行う**。
+  `Preferences`ファイルはheadfulでも拡張機能読み込み後すぐには書き込まれず(環境によっては数秒待っても
+  生成されない)、タイムアウトの原因になっていた。`chrome://extensions`を開いてshadow DOM越しに
+  `extensions-item`の`id`属性を読む方式は即座に解決できる(`fixtures.ts`の`resolveExtensionId`参照)。
 
-CI環境やChromeバージョンによっては問題なく動作する可能性があるため、`npm run test:e2e`が失敗する場合は
-まずこの既知の制約を疑うこと。
+2026-09時点で上記2点を反映した状態でこの環境(WSL2, Xvfb)にて5件全てpassを複数回確認済み。
 
 ## セットアップ
 
