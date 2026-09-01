@@ -7,14 +7,14 @@ danime-save-annict-2 は Chrome 拡張機能として動作し、動画配信サ
 ## 技術スタック
 
 - **言語**: TypeScript
-- **ビルドツール**: webpack (TypeScript トランスパイル + バンドル)
+- **ビルドツール**: tsc (型チェックのみ、`--noEmit`) + esbuild (バンドル・出力)
 - **テストフレームワーク**: Jest + ts-jest + jsdom
 - **対応ブラウザ**: Chrome (Manifest V3)
 - **対応サービス**:
   - dアニメストア (`animestore.docomo.ne.jp`)
   - Amazon Prime Video (`amazon.co.jp`)
-  - Netflix (`netflix.com`)
   - Abema TV (`abema.tv`)
+  - ~~Netflix~~ (`netflix.com`): 解析モジュール(`sites/netflix.ts`)・URL判定・型定義は存在するが、`manifest.json`の`content_scripts.matches`にnetflix.comが含まれておらずcontent scriptが注入されない。オプション画面のチェックボックスもコメントアウト済み。実質的に無効化された未使用コード
 
 ## システム構成図
 
