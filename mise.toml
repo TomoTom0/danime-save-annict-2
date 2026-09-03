@@ -1,0 +1,23 @@
+[tasks.build]
+description = "全体ビルド (TypeScript + SCSS + ファイルコピー)"
+run = "npm run build"
+
+[tasks."build:ts"]
+description = "TypeScript コンパイル"
+run = "npm run build:ts"
+
+[tasks."build:css"]
+description = "SCSS コンパイル"
+run = "npm run build:css"
+
+[tasks."build:copy"]
+description = "静的ファイルコピー"
+run = "npm run build:copy"
+
+[tasks.test]
+description = "全テスト実行"
+run = "npm test"
+
+[tasks.deploy]
+description = "dist/ を .env の DEPLOY_DEST へ rsync"
+run = "bash scripts/deploy.sh"

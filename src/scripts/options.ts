@@ -28,9 +28,9 @@ const webhookKeys = {
     input: ["postUrl"]
 };
 
-const amazonAbemaDefaults: any[] = ["amazon", "abema"].map(key => ({ [`valid_${key}`]: false }));
+const amazonAbemaDefaults: Record<string, boolean>[] = ["amazon", "abema"].map(key => ({ [`valid_${key}`]: false }));
 const checkValid1 = Object.assign({ "valid_danime": true }, ...amazonAbemaDefaults);
-const vodDefaults: any[] = ["danime","amazon", "abema"].map(key =>
+const vodDefaults: Record<string, boolean>[] = ["danime","amazon", "abema"].map(key =>
         ({[`valid_${key}Annict`]:true, [`valid_${key}Webhook`]:true, [`valid_${key}Genre`]:false}));
 const checkValid2 = Object.assign({}, ...vodDefaults);
 const checkValid = Object.assign(checkValid1, checkValid2);
@@ -47,24 +47,25 @@ if (document.readyState === 'loading') {
     init();
 }
 
-function init() {
-    //------ not webhook ---------
-    // set value
+function loadInputSettings(): void {
     chrome.storage.sync.get(otherKeys.input, items =>
         Object.entries(items).forEach(kv => {
             const elem = document.querySelector<HTMLInputElement>(`#input_${kv[0]}`);
             if (elem) elem.value = kv[1] as string;
         })
     );
+}
+
+function loadCheckboxSettings(): void {
     chrome.storage.sync.get(otherKeys.check, items => {
-        //console.log(items)
         Object.entries(items).forEach(kv => {
             const elem = document.querySelector<HTMLInputElement>(`#check_${kv[0]}`);
             if (elem) elem.checked = kv[1] as boolean;
         })
     });
-    //-------------- webhook ---------------
-    // set value
+}
+
+function loadWebhookSettings(): void {
     chrome.storage.sync.get({ webhookSettings: webhookDefaultString }, items => {
         const webhookSettings = checkWebhookSettings(items.webhookSettings);
         let firstBlock = true;
@@ -129,16 +130,24 @@ function init() {
             })
         })
     });
+}
+
+function setupCheckboxChains(): void {
     setTimeout(()=>{
-        ([].concat(["danime", "amazon", "abema"].map(vod=>
+        (([] as any[]).concat(["danime", "amazon", "abema"].map(vod=>
             [`valid_${vod}`, [`valid_${vod}Annict`, `valid_${vod}Webhook`, `valid_${vod}Genre`]]
         ), [[`annictSend`, ["danime", "amazon", "abema"]
         .map(vod => `valid_${vod}Annict`).concat(["withTwitter", "withFacebook"])]]))
-        .map(d=>[document.querySelector(`#check_${d[0]}`), d[1].map(dd=>document.querySelector(`#check_${dd}`))])
-        .forEach(d=>chainCheckBox(d[0], d[1]))
-    }, 10)
+        .map((d: any)=>[document.querySelector(`#check_${d[0]}`), d[1].map((dd: string)=>document.querySelector(`#check_${dd}`))])
+        .forEach((d: any)=>chainCheckBox(d[0], d[1]))
+    }, 10);
+}
 
-
+function init() {
+    loadInputSettings();
+    loadCheckboxSettings();
+    loadWebhookSettings();
+    setupCheckboxChains();
 }
 })();
 
@@ -191,14 +200,14 @@ document.addEventListener("click", function (e: MouseEvent) {
                 chrome.storage.sync.set({ webhookSettings: JSON.stringify(webhookSettings) });
             });
         };
-        ([].concat(["danime", "amazon", "abema"].map(vod=>
+        (([] as any[]).concat(["danime", "amazon", "abema"].map(vod=>
             [`valid_${vod}`, [`valid_${vod}Annict`, `valid_${vod}Webhook`, `valid_${vod}Genre`]]
         ), [[`annictSend`, ["danime", "amazon", "abema"]
         .map(vod => `valid_${vod}Annict`).concat(["withTwitter", "withFacebook"])]]))
-        .map(d=>[document.querySelector(`#check_${d[0]}`), d[1].map(dd=>document.querySelector(`#check_${dd}`))])
-        .forEach(d=>chainCheckBox(d[0], d[1]))
-    
-        
+        .map((d: any)=>[document.querySelector(`#check_${d[0]}`), d[1].map((dd: string)=>document.querySelector(`#check_${dd}`))])
+        .forEach((d: any)=>chainCheckBox(d[0], d[1]))
+
+
     } //----------- webhook content ------------
     else {
         const webhookNumMatch = webhook_now.id.match(/(?<=webhook_)\d+/);
@@ -253,7 +262,7 @@ document.addEventListener("click", function (e: MouseEvent) {
             chrome.storage.sync.get({ webhookSettings: webhookDefaultString }, items => {
                 let webhookSettings = checkWebhookSettings(items.webhookSettings);
                 webhookSettings[webhookNum].webhookContent = webhookContent;
-                Object.entries(inputObjs).forEach(kv => webhookSettings[webhookNum][kv[0]] = kv[1]);
+                Object.entries(inputObjs).forEach(kv => (webhookSettings[webhookNum] as any)[kv[0]] = kv[1]);
                 chrome.storage.sync.set({ webhookSettings: JSON.stringify(webhookSettings) });
             });
             showSimpleMessage("OK", "保存しました");
@@ -265,7 +274,7 @@ document.addEventListener("click", function (e: MouseEvent) {
             const checkVal = (target as HTMLInputElement).checked;
             chrome.storage.sync.get({ webhookSettings: webhookDefaultString }, items => {
                 let webhookSettings = checkWebhookSettings(items.webhookSettings);
-                webhookSettings[webhookNum][checkKey] = checkVal;
+                (webhookSettings[webhookNum] as any)[checkKey] = checkVal;
                 chrome.storage.sync.set({ webhookSettings: JSON.stringify(webhookSettings) });
             });
         }
@@ -283,16 +292,17 @@ function chainCheckBox(fromCheckbox: HTMLInputElement | null, toCheckboxesIn: No
 }
 
 
-function addWebhookBlock(webhookNum) {
-    //console.log(webhookNum)
-    if (document.querySelector(`#webhook_${webhookNum}`)) return;
-
+function createDeleteButton(webhookNum: string | number): HTMLButtonElement {
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "btn_webhookBlockDelete btn btn-primary";
     deleteButton.id = `btn_webhookBlockDelete_${webhookNum}`;
     deleteButton.textContent = "Webhook設定を削除";
-    const webhook_blockHtml = `<div class="well bs-component" id="webhook_${webhookNum}">
+    return deleteButton;
+}
+
+function getWebhookBlockHtml(webhookNum: string | number): string {
+    return `<div class="well bs-component" id="webhook_${webhookNum}">
     <form class="form-horizontal">
         <div class="form-group">
             <label class="col-lg-2 control-label">Webhook Post URL</label>
@@ -346,15 +356,20 @@ function addWebhookBlock(webhookNum) {
             </div>
         </div>
     </form>
-</div>`
+</div>`;
+}
+
+function addWebhookBlock(webhookNum: string | number) {
+    if (document.querySelector(`#webhook_${webhookNum}`)) return;
 
     const optionMenu = document.querySelector("#extraWebhook");
+    const deleteButton = createDeleteButton(webhookNum);
     optionMenu?.appendChild(deleteButton);
 
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = webhook_blockHtml;
+    tempDiv.innerHTML = getWebhookBlockHtml(webhookNum);
     const webhookBlock = tempDiv.firstElementChild;
-    optionMenu?.appendChild(webhookBlock);
+    if (webhookBlock) optionMenu?.appendChild(webhookBlock);
 }
 
 function checkWebhookSettings(webhookSettingsTmp: string | any): WebhookSettings {

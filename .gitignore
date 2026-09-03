@@ -5,3 +5,6 @@
 wiki/
 node_modules/
 dist/
+src/scripts/*.js
+tests/coverage/
+tests/test-results/

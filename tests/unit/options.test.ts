@@ -1,10 +1,8 @@
 /**
- * options.js のユニットテスト
+ * options.ts のユニットテスト
  */
 
 describe('Options Page', () => {
-  let optionsModule;
-
   beforeEach(() => {
     // テスト前のセットアップ
     document.body.innerHTML = `
@@ -49,32 +47,32 @@ describe('Options Page', () => {
 
   describe('Form validation', () => {
     test('should validate token input', () => {
-      const tokenInput = document.querySelector('#input_token');
-      tokenInput.value = 'test-token-123';
+      const tokenInput = document.querySelector<HTMLInputElement>('#input_token');
+      tokenInput!.value = 'test-token-123';
 
-      expect(tokenInput.value).toBe('test-token-123');
-      expect(tokenInput.value.length).toBeGreaterThan(0);
+      expect(tokenInput!.value).toBe('test-token-123');
+      expect(tokenInput!.value.length).toBeGreaterThan(0);
     });
 
     test('should validate sendingTime input', () => {
-      const sendingTimeInput = document.querySelector('#input_sendingTime');
-      sendingTimeInput.value = '600';
+      const sendingTimeInput = document.querySelector<HTMLInputElement>('#input_sendingTime');
+      sendingTimeInput!.value = '600';
 
-      expect(parseInt(sendingTimeInput.value)).toBe(600);
-      expect(parseInt(sendingTimeInput.value)).toBeGreaterThan(0);
+      expect(parseInt(sendingTimeInput!.value)).toBe(600);
+      expect(parseInt(sendingTimeInput!.value)).toBeGreaterThan(0);
     });
   });
 
   describe('Checkbox states', () => {
     test('should handle checkbox state changes', () => {
-      const annictSendCheckbox = document.querySelector('#check_annictSend');
-      const twitterCheckbox = document.querySelector('#check_withTwitter');
+      const annictSendCheckbox = document.querySelector<HTMLInputElement>('#check_annictSend');
+      const twitterCheckbox = document.querySelector<HTMLInputElement>('#check_withTwitter');
 
-      expect(annictSendCheckbox.checked).toBe(true);
-      expect(twitterCheckbox.checked).toBe(false);
+      expect(annictSendCheckbox!.checked).toBe(true);
+      expect(twitterCheckbox!.checked).toBe(false);
 
-      twitterCheckbox.checked = true;
-      expect(twitterCheckbox.checked).toBe(true);
+      twitterCheckbox!.checked = true;
+      expect(twitterCheckbox!.checked).toBe(true);
     });
   });
 

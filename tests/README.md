@@ -6,15 +6,59 @@ danime-save-annict-2 Chrome拡張機能のテストスイートです。
 
 ```
 tests/
-├── setup.js                 # Jestセットアップファイル（グローバルモック、ヘルパー関数）
-├── unit/                    # ユニットテスト
-│   ├── index.test.js        # 主要ロジックのテスト
-│   └── options.test.js      # オプション画面のテスト
-├── integration/             # 統合テスト
-│   └── workflow.test.js     # 全体ワークフローのテスト
-└── e2e/                     # E2Eテスト（Playwright）
-    └── extension.test.js    # 拡張機能全体のE2Eテスト
+├── setup.ts                 # Jestセットアップファイル（グローバルモック、ヘルパー関数）
+├── playwright.config.ts     # Playwright設定（testDirをintegration-chrome/に限定、tests/unitとの衝突を回避）
+├── unit/                    # ユニットテスト（*.test.ts）
+├── integration/             # 統合テスト（*.test.ts, jsdom）
+└── integration-chrome/      # 結合テスト。実Chromeにビルド済み拡張機能を読み込んで動かす（Playwright, *.spec.ts）
+    ├── fixtures.ts           # dist/を拡張機能として読み込むcontextのfixture
+    ├── options.spec.ts       # オプション画面が実Chromeで開けるか
+    └── content-script.spec.ts # content scriptが実サイトDOM相当のフィクスチャから正しく視聴情報を抽出しAnnictへ送信するか（danime/amazon/abema）
 ```
+
+### tests/integration-chrome/ は結合テストである
+
+`tests/integration/`（jsdom）と同じ**結合テスト**の一種。実行環境が実Chromeである点が異なるだけで、
+外部サービスとの境界をスタブしている（＝実サービスの「end」には到達していない）以上、E2Eではなく結合テスト
+に分類するのが正確。「ユニットテスト」「結合テスト」「E2Eテスト」というテストピラミッド上の呼称を巡って
+何度も判断がぶれたため、参考として**何が実物で何がスタブか**も事実として記載する。
+
+実物:
+- 拡張機能自体（`dist/`をビルドして実Chromeに`--load-extension`で読み込む）
+- content scriptの注入（Chromeの実際の拡張機能読み込み機構経由）
+- Chrome拡張機能API（`chrome.storage`等）
+
+スタブ:
+- **サイト側DOM**: dアニメストア/Amazon Prime Video/AbemaTVの実サーバーには一切アクセスしない。`context.route()`で
+  各サイトの実DOM構造を模したフィクスチャHTMLを返している（ユニットテストのフィクスチャと同じ構造）。
+- **Annict API**: `https://api.annict.com/graphql`への検索リクエストも`context.route()`でスタブし、実サーバーへは
+  送信されない。リクエストの中身（抽出したタイトルが検索クエリに正しく載っているか）は検証している。
+
+d アニメストア/Amazon Prime Video/AbemaTVはいずれも要ログインの有料サービスであり、実サーバーに到達する
+テストには実アカウントの認証情報が必須で、Claude側で勝手に用意することはできない。TASK-33として
+ユーザー提供の実アカウント情報待ちで記録している。
+
+### 実行時の注意点
+
+`chromium.launchPersistentContext`で`dist/`を`--load-extension`で読み込む方式を採る。
+
+- **`--load-extension`はheadlessモードでは無視される**(Chrome自体の既知の制限。`--headless=new`はもちろん
+  レガシー`--headless`でも拡張機能は読み込まれない)。そのため`fixtures.ts`は`headless: false`固定。
+  ディスプレイのない環境(CI、WSL2等)では`xvfb-run`で仮想ディスプレイを用意して実行すること:
+  ```bash
+  npm run test:integration-chrome:xvfb
+  ```
+- **拡張機能IDの解決はプロファイルの`Preferences`ファイルではなく`chrome://extensions`のDOMから行う**。
+  `Preferences`ファイルはheadfulでも拡張機能読み込み後すぐには書き込まれず(環境によっては数秒待っても
+  生成されない)、タイムアウトの原因になっていた。`chrome://extensions`を開いてshadow DOM越しに
+  `extensions-item`の`id`属性を読む方式は即座に解決できる(`fixtures.ts`の`resolveExtensionId`参照)。
+
+2026-09時点で上記2点を反映した状態でこの環境(WSL2, Xvfb)にて全件passを複数回確認済み。
+
+`content-script.spec.ts`の各サイトには2種類のテストがある:
+
+- **起動確認**(全サイト): content scriptが構文エラーなく実行開始するか(TASK-28の回帰防止)
+- **抽出+送信ペイロード確認**(danime, abemaのみ): フィクスチャDOMから`obtainWatchingFrom*`が実際に視聴情報を抽出し、Annictへの検索クエリに正しく組み込まれるかを実Chrome上で検証。amazonのみ`test.skip`: `obtainWatchingFromAmazon`は`video.played.length > 0`(実再生開始)が条件になっており、MV3のcontent scriptは"isolated world"で動くため`page.addInitScript()`によるプロトタイプ上書きが届かない(main worldからは上書きが見えるが、isolated worldのcontent scriptからは見えないことを実験で確認済み)。実現するには本物の再生可能な動画フィクスチャか、isolated worldを狙ったCDP `Runtime.evaluate`が必要で、現状のテストファイルの範囲を超える。
 
 ## セットアップ
 
@@ -34,6 +78,11 @@ npm run test:unit
 
 # 統合テストのみ
 npm run test:integration
+
+# 実Chromeに拡張機能を読み込んで動かすテストのみ（事前にプロジェクトルートで npm run build が必要）
+npm run test:integration-chrome
+# ディスプレイのない環境（CI、WSL2等）では
+npm run test:integration-chrome:xvfb
 
 # ウォッチモード
 npm run test:watch
@@ -107,6 +156,6 @@ npm run test:ci
 
 ## 注意事項
 
-- テストは TypeScript コンパイル後の JavaScript ファイル（`dist/scripts/`）を対象としています
-- テスト実行前に `npm run build` を実行してください
-- Chrome拡張機能の実行環境を jsdom でシミュレートしています
+- ユニット・統合テストは `src/` 配下の TypeScript を ts-jest で直接実行します（`dist/` は対象外）
+- `tests/integration-chrome/`配下のテストは `dist/` を拡張機能として読み込むため、実行前に必ずプロジェクトルートで `npm run build` を実行してください
+- Chrome拡張機能の実行環境を jsdom でシミュレートしています（`tests/integration-chrome/`配下のみ実Chromeを使用）

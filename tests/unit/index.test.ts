@@ -1,5 +1,5 @@
 /**
- * index.js の主要機能のユニットテスト
+ * index.ts の主要機能のユニットテスト
  */
 
 describe('Main Extension Logic', () => {
@@ -50,20 +50,28 @@ describe('Main Extension Logic', () => {
   });
 
   describe('Site detection', () => {
-    test('should detect danime site correctly', () => {
-      window.location.href = 'https://animestore.docomo.ne.jp/animestore/sc_d_pc?partId=12345001';
-      // サイト検出ロジックのテスト
-      expect(window.location.href).toContain('animestore.docomo.ne.jp');
+    const siteUrls = {
+      danime: 'https://animestore.docomo.ne.jp/animestore/sc_d_pc?partId=12345001',
+      amazon: 'https://www.amazon.co.jp/gp/video/detail/B08XYZABC',
+      abema: 'https://abema.tv/video/episode/54-1_s1_p1'
+    };
+
+    test('should identify danime URL pattern', () => {
+      const url = siteUrls.danime;
+      const isDanime = url.indexOf('https://animestore.docomo.ne.jp/animestore/sc_d_pc?partId') !== -1;
+      expect(isDanime).toBe(true);
     });
 
-    test('should detect Amazon Prime Video site correctly', () => {
-      window.location.href = 'https://www.amazon.co.jp/gp/video/detail/B08XYZABC';
-      expect(window.location.href).toContain('amazon.co.jp/gp/video');
+    test('should identify Amazon Prime Video URL pattern', () => {
+      const url = siteUrls.amazon;
+      const isAmazon = url.indexOf('https://www.amazon.co.jp/gp/video/detail/') !== -1;
+      expect(isAmazon).toBe(true);
     });
 
-    test('should detect Abema TV site correctly', () => {
-      window.location.href = 'https://abema.tv/video/episode/54-1_s1_p1';
-      expect(window.location.href).toContain('abema.tv/video');
+    test('should identify Abema TV URL pattern', () => {
+      const url = siteUrls.abema;
+      const isAbema = url.indexOf('https://abema.tv/video/') !== -1;
+      expect(isAbema).toBe(true);
     });
   });
 
@@ -72,15 +80,15 @@ describe('Main Extension Logic', () => {
       const episodeNumber = '第1話';
       const match = episodeNumber.match(/\d+/);
       expect(match).not.toBeNull();
-      expect(parseInt(match[0])).toBe(1);
+      expect(parseInt(match![0])).toBe(1);
     });
 
     test('should handle combined episode numbers', () => {
       const episodeNumber = '第1話～第2話';
       const matches = episodeNumber.match(/\d+/g);
       expect(matches).toHaveLength(2);
-      expect(parseInt(matches[0])).toBe(1);
-      expect(parseInt(matches[1])).toBe(2);
+      expect(parseInt(matches![0])).toBe(1);
+      expect(parseInt(matches![1])).toBe(2);
     });
   });
 
